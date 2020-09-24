@@ -2,14 +2,24 @@ import "source-map-support/register"
 import "reflect-metadata"
 import "jest"
 
-import { _getInjectedIdAt, Inject, Injectable, Optional, PostConstruct, Singleton, Scope } from "../decorators"
+import {
+  _getInjectedIdAt,
+  Inject,
+  Injectable,
+  Optional,
+  PostConstruct,
+  Singleton,
+  Scope,
+  Factory,
+  FactoryMetadata
+} from "../decorators"
 import { InjectableId } from "../injector"
 import { Container } from "../container"
 import {
   POSTCONSTRUCT_ASYNC_METADATA_KEY,
   POSTCONSTRUCT_SYNC_METADATA_KEY,
   REFLECT_PARAMS,
-  INJECTABLE_METADATA_KEY, SCOPE_METADATA_KEY
+  INJECTABLE_METADATA_KEY, SCOPE_METADATA_KEY, FACTORY_METADATA_KEY
 } from "../constants"
 import { ProviderOptions } from "../providers"
 
@@ -76,6 +86,77 @@ describe("@Singleton", () => {
 
     expect(setup).toThrowError(/^@Scope can not be specified if `scope` is provided in `options`.+/)
   })
+})
+
+
+describe("@Factory", () => {
+  it("Should generate proper metadata", async () => {
+    @Injectable()
+    class A {}
+
+    @Injectable()
+    class B {}
+
+    @Singleton()
+    class Target {
+
+      @Factory()
+      static async create(a: A, b: B) {
+        expect(a).toBeInstanceOf(A)
+        expect(b).toBeInstanceOf(B)
+        return new Promise(resolve => {
+          setTimeout(() => resolve( new Target(a,b)), 10)
+        })
+      }
+
+      // noinspection JSUnusedLocalSymbols
+      public constructor(private a: A, private b: B) {}
+
+      test() {
+        expect(this.a).toBeInstanceOf(A)
+        expect(this.b).toBeInstanceOf(B)
+      }
+    }
+
+
+    const params = Reflect.getMetadata(REFLECT_PARAMS, Target, "create")
+
+    expect(Array.isArray(params)).toBeTruthy()
+    expect(params?.length).toEqual(2)
+
+    const md = Reflect.getMetadata(FACTORY_METADATA_KEY, Target) as FactoryMetadata
+    expect(md).toBeDefined()
+    expect(md.methodName).toEqual("create")
+    expect(params.every((param, idx) => md.params[idx] === param)).toBeTruthy()
+
+
+    const container = new Container()
+    container.bindClass(A)
+    container.bindClass(B)
+    container.bindClass(Target)
+    const target = await container.resolve(Target)
+    target.test()
+
+    // expect(metadata[0]).toBe(A)
+    // expect(metadata[1]).toBe(Object)
+    //
+    // const
+    //   options = Reflect.getMetadata(INJECTABLE_METADATA_KEY, Target) as ProviderOptions<Target>,
+    //   scope = Reflect.getMetadata(SCOPE_METADATA_KEY, Target)
+    //
+    // expect(scope).toEqual("singleton")
+    // expect(scope).toEqual(options.scope)
+  })
+
+  // it("Should throw when applied multiple times", () => {
+  //   function setup() {
+  //     @Singleton()
+  //     @Scope("instance")
+  //     class A {}
+  //   }
+  //
+  //   expect(setup).toThrowError(/^@Scope can not be specified if `scope` is provided in `options`.+/)
+  // })
 })
 
 describe("@PostConstruct", () => {

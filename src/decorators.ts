@@ -9,7 +9,8 @@ import {
   OPTIONAL_METADATA_KEY,
   POSTCONSTRUCT_ASYNC_METADATA_KEY,
   POSTCONSTRUCT_SYNC_METADATA_KEY,
-  REFLECT_RETURN, SCOPE_METADATA_KEY
+  REFLECT_RETURN,
+  SCOPE_METADATA_KEY, REFLECT_PARAMS, FACTORY_METADATA_KEY
 } from "./constants"
 import { isFunction, isClass } from "@3fv/guard"
 import { ProviderOptions } from "./providers"
@@ -79,24 +80,22 @@ export function Injectable<T, Options extends ProviderOptions<T> = {}>(options: 
       throw new Error("@Injectable applied multiple times [" + targetHint(target) + "]")
     }
     Reflect.defineMetadata(INJECTABLE_METADATA_KEY, options, target)
-    Option
-      .ofNullable(options.scope)
+    Option.ofNullable(options.scope)
       .filter(isNotEmpty)
       .map(Scope)
-      .ifSome(scope =>
-        scope(target)
-      )
+      .ifSome(scope => scope(target))
   }
 }
 
 export function Scope<T>(scope: Scopes) {
   return function (target: T) {
-
     if (Reflect.hasOwnMetadata(SCOPE_METADATA_KEY, target)) {
-      throw new Error("@Scope can not be specified if `scope` is provided in `options` for @Injectable [" + targetHint(target) + "]")
+      throw new Error(
+        "@Scope can not be specified if `scope` is provided in `options` for @Injectable [" + targetHint(target) + "]"
+      )
     }
 
-    Reflect.defineMetadata(SCOPE_METADATA_KEY, scope, target);
+    Reflect.defineMetadata(SCOPE_METADATA_KEY, scope, target)
   }
 }
 
@@ -191,5 +190,28 @@ export function PostConstruct() {
     } else {
       Reflect.defineMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, methodName, target.constructor)
     }
+  }
+}
+
+
+export interface FactoryMetadata {
+  methodName: string
+  params: any[]
+}
+
+export function Factory() {
+  return function (target: any, methodName: string, _descriptor: PropertyDescriptor) {
+    const params = Reflect.getMetadata(REFLECT_PARAMS, target, methodName),
+      metadata:FactoryMetadata = {
+        methodName,
+        params
+      }
+
+    Reflect.defineMetadata(
+      FACTORY_METADATA_KEY,
+      metadata,
+      target
+    )
+    //console.log("factory params", params)
   }
 }

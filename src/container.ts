@@ -145,6 +145,10 @@ export class Container implements Binder {
     return deferred.promise
   }
 
+  resolveAll() {
+    return this.init()
+  }
+
   /**
    * @inheritDoc
    */
@@ -204,13 +208,15 @@ export class Container implements Binder {
     options: ProviderOptions = undefined
   ) {
     this.assertBindable()
-    const [id, constructor] = (isFunction(constructorOrAbstractOrId)
+    const [defaultId, constructor] = (isFunction(constructorOrAbstractOrId)
       ? !isFunction(constructorOrOptions)
         ? [constructorOrAbstractOrId, constructorOrAbstractOrId]
         : [constructorOrAbstractOrId, constructorOrOptions]
       : isFunction(constructorOrOptions)
       ? [constructorOrAbstractOrId, constructorOrOptions]
       : [undefined, undefined]) as [InjectableId<T>, ClassConstructor<T>]
+
+    const id = options?.id ?? defaultId
 
     if ([id, constructor].some(isNotDefined)) {
       throw Error(`Class constructor/id could not be established`)

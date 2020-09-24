@@ -59,7 +59,7 @@ export abstract class BindableProvider<
    * @param waitFor   The supplied Promise.
    * @param cb    Callback to be invoked if the supplied Promise resolves.
    */
-  protected async makePromiseForObj<R>(waitFor: Promise<R>, cb: (result: R) => T): Promise<T> {
+  protected async makePromiseForObj<R>(waitFor: Promise<R>, cb: (result: R | Promise<R>) => T | Promise<T>): Promise<T> {
     try {
       const pending = await waitFor,
         result = cb(pending)

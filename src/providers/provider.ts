@@ -1,6 +1,6 @@
 import { State } from "../state"
 
-import { Injector } from "../injector"
+import { Injector, InjectableId } from "../injector"
 import { defaults } from "lodash"
 import { OnErrorCallback } from "../error"
 import { Scopes, KnownScopes, KnownScope } from "../scope"
@@ -18,7 +18,8 @@ export type SyncFactory<T> = (injector: Injector) => T
 export type AsyncFactory<T> = (injector: Injector) => Promise<T>
 
 export interface ProviderConfig<T = any, M = any> {
-  //singleton: boolean
+
+  id?: InjectableId<any>
 
   scope: Scopes
 
@@ -83,7 +84,8 @@ export abstract class Provider<T = any, M = any> {
    * Base method to initialize the state of this Provider *if* (and only if) it has been configured as a Singleton.
    * If this Provider has not been configured as a singleton, this method is essentially a noop that returns undefined.
    *
-   * @returns {Promise<undefined | T>} completion Promise if initialization requires asynchronicity, otherwise the return value is undefined.
+   * @returns {Promise<undefined | T>} completion Promise if initialization requires asynchronicity, otherwise the
+   *   return value is undefined.
    */
   async resolve(): Promise<T> {
     if (this.isSingleton) {

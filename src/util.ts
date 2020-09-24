@@ -1,7 +1,8 @@
 import { isDev } from "./dev"
-import { isFunction, isDefined, isString, isSymbol, isClass } from "@3fv/guard"
+import { isFunction, isBoolean,isDefined, isString, isSymbol, isClass } from "@3fv/guard"
 import { InjectableId } from "./injector"
 import { isEmpty, negate } from "lodash"
+import { Option } from "@3fv/prelude-ts"
 
 export function debug(test: boolean, ...args:any[])
 export function debug(...args:any[])
@@ -12,13 +13,15 @@ export function debug(...args:any[]) {
 }
 
 export function info(test: boolean, ...args:any[]) {
-  if (isDev && test) {
+  if (isDev && !!test) {
+    Option.of(test)
+      .filter(negate(isBoolean))
     console.info(...args)
   }
 }
 
-export function warn(test: boolean, ...args:any[]) {
-  if (isDev && test) {
+export function warn(test: boolean | string, ...args:any[]) {
+  if (isDev && test !== false) {
     console.warn(...args)
   }
 }

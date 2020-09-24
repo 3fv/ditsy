@@ -7,10 +7,10 @@
   resolved "https://registry.npmjs.org/@3fv/deferred/-/deferred-1.2.1.tgz#79f20c2004a4ed293f41f16c12c3523a614de8ef"
   integrity sha512-aJ4PSK+DrboFkLbz2ux3Izp5UTgwUF3Twr9MfPyvfmBd80DN8cP691G8dVFcg9EVTUsCifVAPCaaTfTa+Svusg==
 
-"@3fv/guard@^1.4.15":
-  version "1.4.15"
-  resolved "https://registry.npmjs.org/@3fv/guard/-/guard-1.4.15.tgz#81070c989dcf4cda0ef948df684a2059b3425029"
-  integrity sha512-65ZIgM7wyBY1QU+yImVafjbPoHEBZCCVWJQzunFMEswQGINOmWet397WJVY5BgYTMeN++6ouks/DVIK/vA4oZQ==
+"@3fv/guard@^1.4.16":
+  version "1.4.16"
+  resolved "https://registry.npmjs.org/@3fv/guard/-/guard-1.4.16.tgz#fa54751dc21b4e3751579c67ee9f16a56343c525"
+  integrity sha512-znI83LxuxEJCBphoEhKvnvuAOP00N8L0nPKEzpyYq4cFHtmHFztNrk9MwZkUYu17YojuVLNVLSN/mlHzaLgzsw==
   dependencies:
     lodash "^4.17.15"
 
@@ -3989,6 +3989,11 @@ ts-node@^9.0.0:
     make-error "^1.1.1"
     source-map-support "^0.5.17"
     yn "3.1.1"
+
+ts-pattern@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/ts-pattern/-/ts-pattern-1.1.0.tgz#f7ecb9c13b3b1a92f9a16ef96e692da3c81178b1"
+  integrity sha512-7lipCHmn9UkP3HCSkH45juwZy0/CBo+3FyblHdkhWZ7BTlxyGTiadK983fePPqDzedVPCaz9Wgco9GQ8Md0XEQ==
 
 tsconfig-paths@^3.9.0:
   version "3.9.0"
