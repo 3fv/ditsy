@@ -24,16 +24,16 @@ export interface Injector {
 	 * @param id    The id to check for.
 	 * @param ascending If true, this will search up the chain of parent containers (if they exist).  Default is false (only checks if the id is bound within this container).
 	 */
-	isIdKnown<T>(id: InjectableId<T> | AbstractConstructor<T>, ascending?: boolean): boolean;
+	isIdKnown<T>(id: InjectableId<T>, ascending?: boolean): boolean;
 
 	/**
 	 * Return an instance of <T> previously bound to 'id'.
 	 * @throws Error if the InjectableId was never registered, OR if there are unresolved asynchronous dependencies in the dependency tree for 'id'.
 	 */
-	get<T>(id: InjectableId<T> | AbstractConstructor<T>): T;
+	get<T>(id: InjectableId<T>): T;
 
 	/**
 	 * awaits the asynchronous resolution of all dependencies in the tree for 'id'.
 	 */
-	resolve<T>(id?: InjectableId<T> | AbstractConstructor<T>): Promise<T>;
+	resolve<T>(id?: InjectableId<T>): Promise<T>;
 }

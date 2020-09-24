@@ -4,7 +4,7 @@
     <node-options value="--require source-map-support/register  --require ts-node/register/transpile-only  --require tsconfig-paths/register" />
     <jest-package value="$PROJECT_DIR$/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$" />
-    <jest-options value="--coverage=false" />
+    <jest-options value="--coverage=false --watchAll" />
     <envs />
     <scope-kind value="ALL" />
     <method v="2" />

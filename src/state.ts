@@ -1,61 +1,81 @@
 /**
  * Internal class that allows us to track the state of a promise (chain).
  */
-export class State<T = any> {
-	static MakeState<T = any>(promise: Promise<T>, rejected?: any, fulfilled?: T): State<T> {
-		let retVal = new State<T>();
-		if (promise) {
-			retVal._pending = true;
-			retVal._promise = promise.then(
-				(v) => {
-					retVal._fulfilled = v;
-					retVal._pending = false;
-					return v;
-				},
-				(e: any) => {
-					retVal._rejected = e;
-					retVal._pending = false;
-					throw e;
-				}
-			);
-		}
-		else {
-			retVal._pending = false;
-			if (rejected) {
-				retVal._rejected = rejected;
-			}
-			else {
-				retVal._fulfilled = fulfilled;
-			}
-			retVal._promise = null;
-		}
-		return retVal;
-	}
+import { isDefined, isPromise } from "@3fv/guard"
 
-	protected constructor() {
-	}
+export interface StateData<T, E> {
+  pending: boolean
+  promise?: Promise<T>
+  value?: T
+  rejection?: Error | any
+}
 
-	protected _promise: Promise<T>;
+export class State<T = any, E = any> {
+  /**
+   * Create a state record
+   *
+   * @param {Promise<T>} promise
+   * @param rejection
+   * @param {T} value
+   * @returns {State<T>}
+   */
+  static create<T = any, E = any>(promise: Promise<T>, rejection?: E, value?: T): State<T> {
+    const state = new State<T, E>()
 
-	get promise(): Promise<T> {
-		return this._promise;
-	}
+    const { data } = state
 
-	protected _pending;
+    if (isPromise(promise)) {
+      Object.assign(data, {
+        pending: true,
+        promise: promise.then(
+          v => {
+            data.value = v
+            data.pending = false
+            return v
+          },
+          (e: any) => {
+            data.rejection = e
+            data.pending = false
+            throw e
+          }
+        )
+      })
+    } else {
+      data.pending = false
+      if (rejection) {
+        data.rejection = rejection
+      } else {
+        data.value = value
+      }
+      data.promise = null
+    }
+    return state
+  }
 
-	get pending(): boolean {
-		return this._pending;
-	}
+  protected readonly data: StateData<T, E>
 
-	protected _fulfilled: T;
+  protected constructor() {
+    this.data = {
+      pending: true,
+      promise: null,
+      value: null,
+      rejection: null
+    }
+  }
 
-	get fulfilled(): T {
-		return this._fulfilled;
-	}
+  get promise(): Promise<T> {
+    return this.data.promise
+  }
 
-	protected _rejected: any;
+  get pending(): boolean {
+    return this.data.pending
+  }
 
-	get rejected(): any {
-		return this._rejected;
-	}
+  get fulfilled(): T {
+    return this.data.value
+  }
+
+  get rejected(): E | any{
+    return this.data.rejection
+  }
 }

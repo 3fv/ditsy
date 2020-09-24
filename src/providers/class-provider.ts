@@ -1,8 +1,9 @@
-import {InjectableId, Injector, ClassConstructor} from './injector';
-import {_getInjectedIdAt, _getOptionalDefaultAt} from './decorators';
-import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from './constants';
-import {State} from './state';
+import {InjectableId, Injector, ClassConstructor} from '../injector';
+import {_getInjectedIdAt, _getOptionalDefaultAt} from '../decorators';
+import {POSTCONSTRUCT_ASYNC_METADATA_KEY, POSTCONSTRUCT_SYNC_METADATA_KEY, REFLECT_PARAMS} from '../constants';
+import {State} from '../state';
 import {BindableProvider} from './bindable-provider';
+import { SyncFactory, ProviderOptions } from "./provider"
 
 export type ResolveStateCallback = (id: InjectableId<any>) => State;
 
@@ -10,9 +11,9 @@ export type ResolveStateCallback = (id: InjectableId<any>) => State;
  * @inheritDoc
  * This specialization invokes it's configured class constructor synchronously and then scans for (and invokes) any @PostConstruct (which may be synchronous or asynchronous).
  */
-export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<T>> {
-	constructor(injector: Injector, id: InjectableId<T>, maker: ClassConstructor<T>, protected stateResolver: ResolveStateCallback) {
-		super(injector, id, maker);
+export class ClassBasedProvider<T, M extends ClassConstructor<T> = ClassConstructor<T>, Options extends ProviderOptions<T,M> = {}> extends BindableProvider<T, M, Options> {
+	constructor(injector: Injector, id: InjectableId<T>, maker: M, protected stateResolver: ResolveStateCallback, options: Options = {} as Options) {
+		super(injector, id, maker, options);
 	}
 
 	/**
@@ -30,15 +31,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 		return retVal;
 	}
 
-	/**
-	 * @inheritDoc
-	 * This specialization returns undefined if 'asyncOnly' is true and there is no asynchronous PostConstruct annotation (since class constructors can never by asynchronous).
-	 */
-	resolveIfSingleton(asyncOnly: boolean): Promise<T> {
-		if ((!asyncOnly) || Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, this.maker))
-			return super.resolveIfSingleton(false);
-		return undefined;
-	}
+
 
 	/**
 	 * Make a resolved or pending State that reflects any @PostConstruct annotations.
@@ -61,22 +54,22 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 					// The post construction method threw while executing, give the errorHandler (if any) a crack at recovery.
 					try {
 						obj = this.queryErrorHandler(err, obj); // The returned obj is unlikely to be the original obj.
-						return State.MakeState<T>(null, undefined, obj);
+						return State.create<T>(null, undefined, obj);
 					}
 					catch (e) {
 						// could not recover, propagate the error.
-						return State.MakeState<T>(null, e, undefined);
+						return State.create<T>(null, e, undefined);
 					}
 				}
 				// The post construction method says it will let us know when it's finished.
 				if (result instanceof Promise || (maybeAsync && typeof result.then === 'function')) {
 					// Return a State that is pending (the other return statements in this method return a State which is resolved or rejected).
-					return State.MakeState<T>(this.makePromiseForObj<void>(result, () => obj));
+					return State.create<T>(this.makePromiseForObj<void>(result, () => obj));
 				}
 			}
 		}
 		// No PostConstruct, just return a resolved State
-		return State.MakeState<T>(null, undefined, obj);
+		return State.create<T>(null, undefined, obj);
 	}
 
 	/**
@@ -101,7 +94,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			if ((!param.pending) && param.rejected) {
 				let md = _getOptionalDefaultAt(this.maker, index);
 				if (md)
-					param = State.MakeState<any>(null, undefined, md.value);
+					param = State.create<any>(null, undefined, md.value);
 			}
 			return param;
 		});
@@ -134,7 +127,7 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 				return Reflect.construct(this.maker, params.map((p) => p.fulfilled));
 			});
 			// Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
-			return State.MakeState<T>(objPromise.then((obj) => {
+			return State.create<T>(objPromise.then((obj) => {
 				let state = this.makePostConstructState(obj);
 				if (state.pending) {
 					return state.promise;   // chain (aka wait some more).
@@ -156,11 +149,11 @@ export class ClassBasedProvider<T> extends BindableProvider<T, ClassConstructor<
 			catch (err) {
 				// There was an error, give the errorHandler (if any) a crack at recovery.
 				try {
-					return State.MakeState<T>(null, undefined, this.queryErrorHandler(err));
+					return State.create<T>(null, undefined, this.queryErrorHandler(err));
 				}
 				catch (e) {
 					// could not recover, propagate the error.
-					return State.MakeState<T>(null, e, undefined);
+					return State.create<T>(null, e, undefined);
 				}
 			}
 		}
