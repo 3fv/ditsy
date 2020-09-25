@@ -4,24 +4,35 @@ import { InjectableId } from "./injector"
 import { isEmpty, negate } from "lodash"
 import { Option } from "@3fv/prelude-ts"
 
-export function debug(test: boolean, ...args:any[])
-export function debug(...args:any[])
-export function debug(...args:any[]) {
-  if (isDev && args[0] !== false) {
+export function debug(test: boolean | any, ...args:any[]){
+  if (isDev && !!test) {
+    args = Option.of(test)
+      .filter(negate(isBoolean))
+      .map(test => [test, ...args])
+      .getOrElse(args)
+
     console.debug(...args)
   }
 }
 
-export function info(test: boolean, ...args:any[]) {
+export function info(test: boolean | any, ...args:any[]) {
   if (isDev && !!test) {
-    Option.of(test)
+    args = Option.of(test)
       .filter(negate(isBoolean))
+      .map(test => [test, ...args])
+      .getOrElse(args)
+
     console.info(...args)
   }
 }
 
-export function warn(test: boolean | string, ...args:any[]) {
-  if (isDev && test !== false) {
+export function warn(test: boolean | any, ...args:any[]) {
+  if (isDev && !!test) {
+    args = Option.of(test)
+      .filter(negate(isBoolean))
+      .map(test => [test, ...args])
+      .getOrElse(args)
+
     console.warn(...args)
   }
 }
