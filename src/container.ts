@@ -196,12 +196,12 @@ export class Container implements Binder {
   /**
    * @inheritDoc
    */
-  bindClass<T>(constructor: ClassConstructor<T>, options?: ProviderOptions)
+  bindClass<T>(constructor: ClassConstructor<T>, options?: ProviderOptions): this
   bindClass<T>(
     id: string | symbol | AbstractConstructor<T>,
     constructor: ClassConstructor<T>,
     options?: ProviderOptions
-  )
+  ): this
   bindClass<T>(
     constructorOrAbstractOrId: ClassConstructor<T>,
     constructorOrOptions: ClassConstructor<T> | ProviderOptions = undefined,
@@ -254,7 +254,7 @@ export class Container implements Binder {
   /**
    * @inheritDoc
    */
-  bindFactory<T>(id: InjectableId<T>, factory: SyncFactory<T>, options: ProviderOptions = {}) {
+  bindFactory<T>(id: InjectableId<T>, factory: SyncFactory<T>, options: ProviderOptions = {}): this {
     this.assertBindable()
     const provider = new FactoryBasedProvider(this, id, factory, options)
     this.providers.set(id, provider)
@@ -264,7 +264,7 @@ export class Container implements Binder {
   /**
    * @inheritDoc
    */
-  bindAsyncFactory<T>(id: InjectableId<T>, factory: AsyncFactory<T>, options: ProviderOptions = {}) {
+  bindAsyncFactory<T>(id: InjectableId<T>, factory: AsyncFactory<T>, options: ProviderOptions = {}): this {
     this.assertBindable()
     const provider = new AsyncFactoryBasedProvider(this, id, factory, options)
     this.providers.set(id, provider)
