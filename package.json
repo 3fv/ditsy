@@ -48,7 +48,7 @@
 		"url": "https://github.com/3fv/ditsy/issues"
 	},
 	"dependencies": {
-		"@3fv/deferred": "^1.2.1",
+		"@3fv/deferred": "^1.2.2",
 		"@3fv/guard": "^1.4.16",
 		"@3fv/prelude-ts": "^0.8.19",
 		"lodash": "^4.17.20",

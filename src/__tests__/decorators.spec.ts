@@ -11,7 +11,8 @@ import {
   Singleton,
   Scope,
   Factory,
-  FactoryMetadata
+  FactoryMetadata,
+  InjectContainer
 } from "../decorators"
 import { InjectableId } from "../injector"
 import { Container } from "../container"
@@ -19,7 +20,9 @@ import {
   POSTCONSTRUCT_ASYNC_METADATA_KEY,
   POSTCONSTRUCT_SYNC_METADATA_KEY,
   REFLECT_PARAMS,
-  INJECTABLE_METADATA_KEY, SCOPE_METADATA_KEY, FACTORY_METADATA_KEY
+  INJECTABLE_METADATA_KEY,
+  SCOPE_METADATA_KEY,
+  FACTORY_METADATA_KEY
 } from "../constants"
 import { ProviderOptions } from "../providers"
 
@@ -69,8 +72,7 @@ describe("@Singleton", () => {
     expect(metadata[0]).toBe(A)
     expect(metadata[1]).toBe(Object)
 
-    const
-      options = Reflect.getMetadata(INJECTABLE_METADATA_KEY, Target) as ProviderOptions<Target>,
+    const options = Reflect.getMetadata(INJECTABLE_METADATA_KEY, Target) as ProviderOptions<Target>,
       scope = Reflect.getMetadata(SCOPE_METADATA_KEY, Target)
 
     expect(scope).toEqual("singleton")
@@ -88,7 +90,6 @@ describe("@Singleton", () => {
   })
 })
 
-
 describe("@Factory", () => {
   it("Should generate proper metadata", async () => {
     @Injectable()
@@ -99,13 +100,12 @@ describe("@Factory", () => {
 
     @Singleton()
     class Target {
-
       @Factory()
       static async create(a: A, b: B) {
         expect(a).toBeInstanceOf(A)
         expect(b).toBeInstanceOf(B)
         return new Promise(resolve => {
-          setTimeout(() => resolve( new Target(a,b)), 10)
+          setTimeout(() => resolve(new Target(a, b)), 10)
         })
       }
 
@@ -118,7 +118,6 @@ describe("@Factory", () => {
       }
     }
 
-
     const params = Reflect.getMetadata(REFLECT_PARAMS, Target, "create")
 
     expect(Array.isArray(params)).toBeTruthy()
@@ -128,7 +127,6 @@ describe("@Factory", () => {
     expect(md).toBeDefined()
     expect(md.methodName).toEqual("create")
     expect(params.every((param, idx) => md.params[idx] === param)).toBeTruthy()
-
 
     const container = new Container()
     container.bindClass(A)
@@ -179,7 +177,6 @@ describe("@PostConstruct", () => {
       }
     }
 
-
     const amd = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, A)
     expect(amd).toBe("initMethod")
     const smd = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, A)
@@ -211,6 +208,31 @@ describe("@PostConstruct", () => {
     }
 
     expect(setup).toThrowError(/^@PostConstruct not applied to instance method \[.+/)
+  })
+})
+
+describe("@InjectContainer", () => {
+  it("Should inject container", async () => {
+
+    @Singleton()
+    class A {
+      public constructor(
+        @InjectContainer()
+        public container: Container
+      ) {
+        expect(container).toBeInstanceOf(Container)
+      }
+    }
+
+    const container = await new Container()
+      .bindClass(A)
+      .resolveAll(),
+      a = container.get(A)
+
+
+
+    expect(a).toBeInstanceOf(A)
+    expect(a.container).toBeInstanceOf(Container)
   })
 })
 
@@ -348,6 +370,5 @@ describe("@Optional", () => {
     expect(t.a.a).toEqual("A")
     expect(t.b.b).toEqual("DefaultB")
     expect(() => container.bindClass<B>("B", B)).toThrow()
-
   })
 })

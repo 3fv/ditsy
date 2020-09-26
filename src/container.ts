@@ -1,7 +1,7 @@
 import "reflect-metadata"
 import { AbstractConstructor, ClassConstructor, InjectableId } from "./injector"
 import { Binder } from "./binder"
-import { INJECTABLE_METADATA_KEY, SCOPE_METADATA_KEY } from "./constants"
+import { INJECTABLE_METADATA_KEY, SCOPE_METADATA_KEY, CONTAINER_ID } from "./constants"
 import { State } from "./state"
 import {
   AsyncFactory,
@@ -31,7 +31,9 @@ export class Container implements Binder {
    *
    * @param parent
    */
-  constructor(protected parent?: Container) {}
+  constructor(protected parent?: Container) {
+    this.bindConstant(CONTAINER_ID, this)
+  }
 
   protected providers = new Map<InjectableId<any>, Provider>()
 

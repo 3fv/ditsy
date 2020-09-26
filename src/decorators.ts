@@ -10,7 +10,7 @@ import {
   POSTCONSTRUCT_ASYNC_METADATA_KEY,
   POSTCONSTRUCT_SYNC_METADATA_KEY,
   REFLECT_RETURN,
-  SCOPE_METADATA_KEY, REFLECT_PARAMS, FACTORY_METADATA_KEY
+  SCOPE_METADATA_KEY, REFLECT_PARAMS, FACTORY_METADATA_KEY, CONTAINER_ID
 } from "./constants"
 import { isFunction, isClass } from "@3fv/guard"
 import { ProviderOptions } from "./providers"
@@ -96,6 +96,12 @@ export function Scope<T>(scope: Scopes) {
     }
 
     Reflect.defineMetadata(SCOPE_METADATA_KEY, scope, target)
+  }
+}
+
+export function InjectContainer() {
+  return function (target: Function, parameterName: string | symbol, parameterIndex: number) {
+    Inject(CONTAINER_ID)(target, parameterName,parameterIndex)
   }
 }
 

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@3fv/deferred@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/@3fv/deferred/-/deferred-1.2.1.tgz#79f20c2004a4ed293f41f16c12c3523a614de8ef"
-  integrity sha512-aJ4PSK+DrboFkLbz2ux3Izp5UTgwUF3Twr9MfPyvfmBd80DN8cP691G8dVFcg9EVTUsCifVAPCaaTfTa+Svusg==
+"@3fv/deferred@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.npmjs.org/@3fv/deferred/-/deferred-1.2.2.tgz#475edbdce22e780f9690ac41b3f2a5fab6f9d4bb"
+  integrity sha512-wwXTjSNJCvGU1X8G2JibdMGwWRdOKgVQjpX+naVFKTKmaufoKPG+GXYllggCjFpnrS/L2rkio6UV/u6i+R9woQ==
 
 "@3fv/guard@^1.4.16":
   version "1.4.16"
