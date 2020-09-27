@@ -16,8 +16,9 @@ import {
 import { Deferred } from "@3fv/deferred"
 import { isFunction, isObject, isPromise, isString } from "@3fv/guard"
 import { Option } from "@3fv/prelude-ts"
-import { debug, idHint, isNotEmpty, isNotDefined } from "./util"
+import { debug, idHint, isNotEmpty, isNotDefined, warn, targetHint } from "./util"
 import { ErrorReason } from "./error"
+import { match, __ } from "ts-pattern"
 
 /**
  * Binder and Injector (aka Container) to handle (a)synchronous dependency management.
@@ -64,12 +65,13 @@ export class Container implements Binder {
 
     const provider = this.providers.get(id)
     if (!provider) {
-      if (this.parent) return this.parent.get<T>(id)
-      throw new Error("Symbol not bound: " + id.toString())
+      if (this.parent)
+        return this.parent.get<T>(id)
+      throw new Error("Symbol not bound: " + targetHint(id))
     }
     const state = provider.provideAsState()
     if (state.pending)
-      throw new Error("Synchronous request on unresolved asynchronous dependency tree: " + id.toString())
+      throw new Error("Synchronous request on unresolved asynchronous dependency tree: " + targetHint(id))
     if (state.rejected) throw state.rejected
     return state.fulfilled
   }
@@ -113,20 +115,20 @@ export class Container implements Binder {
     //let pending = new Map<InjectableId<any>, Promise<void>>()
     // Ask each provider to resolve itself *IF* it is a singleton.
 
-    await Promise.all(
-      [...this.providers.entries()].map(
-        ([id, value]) =>
-          Option.ofNullable(value.resolve())
-            .filter(isPromise)
-            .getOrCall(() => {
-              debug(`${idHint(id)} is not a singleton`)
+    const results = await Promise.all(
+      [...this.providers.entries()]
+        .map(([id, provider]) =>
+          Promise.resolve(provider.resolve())
+            .then(value => Promise.resolve([id, value, provider]))
+          .catch(e => Promise.resolve([id, new ErrorReason(new Map([[id, e]])), provider]))
+          //.then(value => [id, value]) as Promise<[InjectableId<any>, any]>
+        )
+    )
+        // .map(([id,value]) => [id, isPromise(value) ? value : Promise.resolve(value)])
 
-              return Promise.resolve()
-            })
-            .catch(e => new ErrorReason(new Map([[id, e]])))
-            .then(value => [id, value]) as Promise<[InjectableId<any>, any]>
-      )
-    ).then(results => {
+
+
+
       Option.of(
         results
           .filter(([, value]) => value instanceof ErrorReason)
@@ -137,9 +139,10 @@ export class Container implements Binder {
       )
         .filter(it => it.size > 0)
         .ifSome(errors => {
+          warn("Failed to resolve", ...errors)
           throw new ErrorReason(errors)
         })
-    })
+
     // The contract for this method is that it behaves somewhat like Promise.allSettled (e.g. won't complete until all pending Singletons have settled).
     // Further the contract states that if any of the asynchronous Singletons rejected, that we will also return a rejected Promise, and that the rejection reason will be a Map of the InjectableId's that did not resolve, and the Error they emitted.
 
@@ -159,7 +162,6 @@ export class Container implements Binder {
 
     //return this.get<T>(id)
     const state = this.resolveState(id)
-
 
     if (state.promise) {
       return state.promise
@@ -237,8 +239,7 @@ export class Container implements Binder {
     Option.ofNullable(Reflect.getMetadata(SCOPE_METADATA_KEY, constructor))
       .filter(isString)
       .filter(isNotEmpty)
-      .ifSome(scope => Object.assign(options, {scope}))
-
+      .ifSome(scope => Object.assign(options, { scope }))
 
     const provider = new ClassBasedProvider(
       this,
@@ -280,9 +281,9 @@ export class Container implements Binder {
   protected resolveState<T>(id: InjectableId<T>): State<T> {
     const provider = this.providers.get(id)
     if (!provider) {
-      return this.parent?.isIdKnown(id, true)
-        ? this.parent.resolveState<T>(id)
-        : State.create<T>(null, new Error("Symbol not bound: " + id.toString()))
+      return this.parent?.isIdKnown(id, true) ?
+        this.parent.resolveState<T>(id) :
+        State.create<T>(null, new Error("Symbol not bound: " + id.toString()))
     }
     return provider.provideAsState()
   }

@@ -76,10 +76,11 @@ export abstract class BindableProvider<
         if (typeof handlerResult !== "undefined") {
           return handlerResult as T // Error handler provided a replacement, so change the State that we returned from pending to resolved.
         }
-      } else {
+
+      }
         // This will change the State that we returned from pending to rejected.
         throw err
-      }
+
     }
   }
 }

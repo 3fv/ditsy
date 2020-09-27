@@ -24,10 +24,11 @@ export class State<T = any, E = any> {
 
     const { data } = state
 
-    if (isPromise(promise)) {
+    if (isPromise(promise) || isPromise(value)) {
       Object.assign(data, {
         pending: true,
-        promise: promise.then(
+        promise: Promise.resolve(isPromise(value) ? value : promise)
+          .then(
           v => {
             data.value = v
             data.pending = false

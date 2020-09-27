@@ -158,65 +158,74 @@ export class ClassBasedProvider<
     }
     // If any of the params are in a pending state, we will have to wait for them to be resolved before we can
     // construct.
-    return Option.of(params.filter(({ pending }) => pending).map(({ promise }) => promise))
-      .filter(isNotEmpty)
-      .match({
-        Some: pendingParams => {
-          // Some of the parameters needed for construction are not yet available, wait for them and then attempt
-          // construction.
-          const objPromise = this.makePromiseForObj<any[]>(Promise.all(pendingParams), () =>
-            // All the parameters are now available, instantiate the class.
-            // If this throws, it will be handled by our caller.
-            this.createInstance(params)
-          )
-
-          // Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
-          return State.create<T>(
-            objPromise.then(
-              obj =>
-                match<State<T>>(this.makePostConstructState(obj))
-                  .with({ pending: true }, ({ promise }) => promise)
-                  .when(
-                    ({ rejected }) => isDefined(rejected),
-                    state => Promise.reject(state.rejected)
-                  )
-                  .when(
-                    ({ fulfilled }) => isDefined(fulfilled),
-                    ({ fulfilled }: State<T>) => Promise.resolve(fulfilled)
-                  )
-                  .otherwise(() => {
-                    throw new Error(`Unknown state`)
-                  })
-
-              // if (state.pending) {
-              //   return state.promise // chain (aka wait some more).
-              // } else if (state.rejected) {
-              //   return state.rejected // error
-              // } else {
-              //   return state.fulfilled // value (aka obj).
-              // }
+    try {
+      return Option.of(params.filter(({ pending, fulfilled }) => isPromise(fulfilled) || !!pending).map(({ promise,fulfilled }) => isPromise(fulfilled) ? fulfilled : promise))
+        .filter(isNotEmpty)
+        .match({
+          Some: pendingParams => {
+            // Some of the parameters needed for construction are not yet available, wait for them and then attempt
+            // construction.
+            const objPromise = this.makePromiseForObj<any[]>(Promise.all(pendingParams), () =>
+              // All the parameters are now available, instantiate the class.
+              // If this throws, it will be handled by our caller.
+              this.createInstance(params)
             )
-          )
-        },
-        None: () =>
-          // All parameters needed for construction are available, instantiate the object.
-          Either.try(() =>
-            Option.of(this.createInstance(params))
-              .map(o => this.makePostConstructState(o))
-              .get()
-          )
-            .recoverWith(err => {
-              warn("Failed to construct", err)
 
-              return Either.try(() => State.create<T>(null, undefined, this.queryErrorHandler(err))).recoverWith(
-                err2 => {
-                  warn("Failed to construct", err2)
-                  return Either.right(State.create<T>(null, err2, undefined))
-                }
+            // Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
+            return State.create<T>(
+              objPromise.then(
+                obj =>
+                  match<State<T>>(this.makePostConstructState(obj))
+                    .with({ pending: true }, ({ promise }) => promise)
+                    .when(
+                      ({ rejected }) => isDefined(rejected),
+                      state => Promise.reject(state.rejected)
+                    )
+                    .when(
+                      ({ fulfilled }) => isDefined(fulfilled),
+                      ({ fulfilled }: State<T>) => Promise.resolve(fulfilled)
+                    )
+                    .otherwise(() => {
+                      throw new Error(`Unknown state`)
+                    })
+
+                // if (state.pending) {
+                //   return state.promise // chain (aka wait some more).
+                // } else if (state.rejected) {
+                //   return state.rejected // error
+                // } else {
+                //   return state.fulfilled // value (aka obj).
+                // }
               )
-            })
-            .getOrThrow(`Unable to create state`)
-      })
+                .catch(err => {
+                  warn("Failed to construct " + targetHint(this.maker))
+                  throw err
+                })
+            )
+          },
+          None: () =>
+            // All parameters needed for construction are available, instantiate the object.
+            Either.try(() =>
+              Option.of(this.createInstance(params))
+                .map(o => this.makePostConstructState(o))
+                .get()
+            )
+              .recoverWith(err => {
+                warn("Failed to construct", err)
+
+                return Either.try(() => State.create<T>(null, undefined, this.queryErrorHandler(err))).recoverWith(
+                  err2 => {
+                    warn("Failed to construct", err2)
+                    return Either.right(State.create<T>(null, err2, undefined))
+                  }
+                )
+              })
+              .getOrThrow(`Unable to create state`)
+        })
+    } catch (err) {
+      warn("Failed to construct " + targetHint(this.maker))
+      throw err
+    }
   }
 
   private createInstance(params: State[]): Promise<T> | T | undefined {
@@ -228,7 +237,7 @@ export class ClassBasedProvider<
           )
           .map(factoryFn => {
             const checkValue = <T>(value: T): T => {
-                if (!(value instanceof this.maker)) {
+                if (!(value instanceof this.maker) && !(value instanceof (this.id as any))) {
                   throw new Error(`Factory result value is not an instanceof class: ${targetHint(this.maker)}`)
                 }
 

@@ -94,6 +94,8 @@ export abstract class Provider<T = any, M = any> {
         return s.promise
       }else if (s.rejected) {
         return Promise.reject(s.rejected)
+      } else {
+        return s.fulfilled
       }
     }
     return undefined

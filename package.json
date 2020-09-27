@@ -48,12 +48,13 @@
 		"url": "https://github.com/3fv/ditsy/issues"
 	},
 	"dependencies": {
-		"@3fv/deferred": "^1.2.2",
+		"@3fv/deferred": "^1.2.3",
 		"@3fv/guard": "^1.4.16",
 		"@3fv/prelude-ts": "^0.8.19",
 		"lodash": "^4.17.20",
 		"reflect-metadata": "^0.1.13",
-		"ts-pattern": "^1.1.0"
+		"ts-pattern": "^1.1.0",
+    "assert": "^2.0.0"
 	},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
