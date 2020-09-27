@@ -1,6 +1,6 @@
 {
 	"name": "@3fv/ditsy",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Extended from `async-injection` authored by Frank Stock",
 	"author": "Jonathan Glanz",
 	"license": "MIT",
@@ -54,7 +54,7 @@
 		"lodash": "^4.17.20",
 		"reflect-metadata": "^0.1.13",
 		"ts-pattern": "^1.1.0",
-    "assert": "^2.0.0"
+		"assert": "^2.0.0"
 	},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
