@@ -65,8 +65,7 @@ export class Container implements Binder {
 
     const provider = this.providers.get(id)
     if (!provider) {
-      if (this.parent)
-        return this.parent.get<T>(id)
+      if (this.parent) return this.parent.get<T>(id)
       throw new Error("Symbol not bound: " + targetHint(id))
     }
     const state = provider.provideAsState()
@@ -112,44 +111,38 @@ export class Container implements Binder {
       await this.parent.init()
     }
 
-    //let pending = new Map<InjectableId<any>, Promise<void>>()
-    // Ask each provider to resolve itself *IF* it is a singleton.
-
     const results = await Promise.all(
-      [...this.providers.entries()]
-        .map(([id, provider]) =>
+      [...this.providers.entries()].map(
+        ([id, provider]) =>
           Promise.resolve(provider.resolve())
             .then(value => Promise.resolve([id, value, provider]))
-          .catch(e => Promise.resolve([id, new ErrorReason(new Map([[id, e]])), provider]))
-          //.then(value => [id, value]) as Promise<[InjectableId<any>, any]>
-        )
-    )
-        // .map(([id,value]) => [id, isPromise(value) ? value : Promise.resolve(value)])
-
-
-
-
-      Option.of(
-        results
-          .filter(([, value]) => value instanceof ErrorReason)
-          .reduce((errors, [key, err]: [InjectableId<any>, ErrorReason]) => {
-            errors.set(key, err)
-            return errors
-          }, new Map<InjectableId<any>, ErrorReason>())
+            .catch(e => Promise.resolve([id, new ErrorReason(new Map([[id, e]])), provider]))
       )
-        .filter(it => it.size > 0)
-        .ifSome(errors => {
-          warn("Failed to resolve", ...errors)
-          throw new ErrorReason(errors)
-        })
+    )
 
-    // The contract for this method is that it behaves somewhat like Promise.allSettled (e.g. won't complete until all pending Singletons have settled).
-    // Further the contract states that if any of the asynchronous Singletons rejected, that we will also return a rejected Promise, and that the rejection reason will be a Map of the InjectableId's that did not resolve, and the Error they emitted.
+    Option.of(
+      results
+        .filter(([, value]) => value instanceof ErrorReason)
+        .reduce((errors, [key, err]: [InjectableId<any>, ErrorReason]) => {
+          errors.set(key, err)
+          return errors
+        }, new Map<InjectableId<any>, ErrorReason>())
+    )
+      .filter(it => it.size > 0)
+      .ifSome(errors => {
+        warn("Failed to resolve", ...errors)
+        throw new ErrorReason(errors)
+      })
 
     deferred.resolve(this)
     return deferred.promise
   }
 
+  /**
+   * Resolve all bindings
+   *
+   * @returns {Promise<this>}
+   */
   resolveAll() {
     return this.init()
   }
@@ -160,7 +153,6 @@ export class Container implements Binder {
   async resolve<T>(id: InjectableId<T>): Promise<T> {
     await this.init()
 
-    //return this.get<T>(id)
     const state = this.resolveState(id)
 
     if (state.promise) {
@@ -281,9 +273,9 @@ export class Container implements Binder {
   protected resolveState<T>(id: InjectableId<T>): State<T> {
     const provider = this.providers.get(id)
     if (!provider) {
-      return this.parent?.isIdKnown(id, true) ?
-        this.parent.resolveState<T>(id) :
-        State.create<T>(null, new Error("Symbol not bound: " + id.toString()))
+      return this.parent?.isIdKnown(id, true)
+        ? this.parent.resolveState<T>(id)
+        : State.create<T>(null, new Error("Symbol not bound: " + id.toString()))
     }
     return provider.provideAsState()
   }
