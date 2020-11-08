@@ -23,6 +23,8 @@ export interface ProviderConfig<T = any, M = any> {
 
   scope: Scopes
 
+  aliases: InjectableId<any>[]
+
   /**
    * A user supplied error handling function.
    * Default value is undefined.
@@ -38,10 +40,11 @@ export type ProviderOptions<T = any, M = any> = Partial<ProviderConfig<T,M>>
  */
 export abstract class Provider<T = any, M = any> {
   static readonly defaults: ProviderConfig = {
-    scope: KnownScope.instance
+    scope: KnownScope.instance,
+    aliases: []
   }
 
-  protected readonly config: ProviderConfig<T, M>
+  readonly config: ProviderConfig<T, M>
 
   protected get errorHandler() {
     return this.config.onError

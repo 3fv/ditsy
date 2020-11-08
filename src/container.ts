@@ -19,12 +19,15 @@ import { Option } from "@3fv/prelude-ts"
 import { debug, idHint, isNotEmpty, isNotDefined, warn, targetHint } from "./util"
 import { ErrorReason } from "./error"
 import { match, __ } from "ts-pattern"
+import { uniq } from "lodash"
 
 /**
  * Binder and Injector (aka Container) to handle (a)synchronous dependency management.
  */
 export class Container implements Binder {
   private initDeferred: Deferred<this>
+
+  protected providers = new Map<InjectableId<any>, Provider>()
 
   /**
    * Create a new Container, with an optional parent Injector which will be searched if any given InjectableId is not
@@ -36,10 +39,18 @@ export class Container implements Binder {
     this.bindConstant(CONTAINER_ID, this)
   }
 
-  protected providers = new Map<InjectableId<any>, Provider>()
-
   protected get isReady() {
     return this?.initDeferred?.isFulfilled() === true
+  }
+
+  protected addProvider(id: InjectableId<any>, provider: Provider, options?: ProviderOptions) {
+    const allIds = uniq([id,...(options?.aliases ?? []),...(provider.config?.aliases ?? [])]),
+      conflictedIds = allIds.filter(id => this.providers.has(id))
+    if (isNotEmpty(conflictedIds)) {
+      throw new Error(`InjectableId conflicts: ${conflictedIds.join(", ")}`)
+    }
+
+    allIds.forEach(id => this.providers.set(id,provider))
   }
 
   whenReady() {
@@ -185,7 +196,7 @@ export class Container implements Binder {
    */
   bindConstant<T>(id: InjectableId<T>, value: T) {
     this.assertBindable()
-    this.providers.set(id, new ConstantProvider(value))
+    this.addProvider(id, new ConstantProvider(value))
     return this
   }
 
@@ -242,7 +253,7 @@ export class Container implements Binder {
       },
       options
     )
-    this.providers.set(id, provider)
+    this.addProvider(id, provider, options)
     return this
   }
 
@@ -252,7 +263,7 @@ export class Container implements Binder {
   bindFactory<T>(id: InjectableId<T>, factory: SyncFactory<T>, options: ProviderOptions = {}): this {
     this.assertBindable()
     const provider = new FactoryBasedProvider(this, id, factory, options)
-    this.providers.set(id, provider)
+    this.addProvider(id, provider, options)
     return this
   }
 
@@ -262,7 +273,7 @@ export class Container implements Binder {
   bindAsyncFactory<T>(id: InjectableId<T>, factory: AsyncFactory<T>, options: ProviderOptions = {}): this {
     this.assertBindable()
     const provider = new AsyncFactoryBasedProvider(this, id, factory, options)
-    this.providers.set(id, provider)
+    this.addProvider(id, provider, options)
     return this
   }
 
