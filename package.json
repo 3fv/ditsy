@@ -1,6 +1,6 @@
 {
 	"name": "@3fv/ditsy",
-	"version": "1.0.10",
+	"version": "1.0.11",
 	"description": "Extended from `async-injection` authored by Frank Stock",
 	"author": "Jonathan Glanz",
 	"license": "MIT",
@@ -40,9 +40,9 @@
 		"build:watch": "yarn run build --watch",
 		"lint": "tslint -c tslint.json 'src/**/*.ts'"
 	},
-  "publishConfig": {
-    "access": "public"
-  },
+	"publishConfig": {
+		"access": "public"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/3fv/ditsy.git"
