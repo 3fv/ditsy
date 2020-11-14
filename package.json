@@ -40,6 +40,9 @@
 		"build:watch": "yarn run build --watch",
 		"lint": "tslint -c tslint.json 'src/**/*.ts'"
 	},
+  "publishConfig": {
+    "access": "public"
+  },
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/3fv/ditsy.git"
