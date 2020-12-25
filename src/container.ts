@@ -39,8 +39,8 @@ export class Container implements Binder {
     this.bindConstant(CONTAINER_ID, this)
   }
 
-  protected get isReady() {
-    return this?.initDeferred?.isFulfilled() === true
+  get isReady() {
+    return this.initDeferred?.isFulfilled() === true
   }
 
   protected addProvider(id: InjectableId<any>, provider: Provider, options?: ProviderOptions) {
@@ -85,6 +85,7 @@ export class Container implements Binder {
     if (state.rejected) throw state.rejected
     return state.fulfilled
   }
+
 
   /**
    * Once resolution (`init`) has begun,

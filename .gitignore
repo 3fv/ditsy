@@ -1,11 +1,15 @@
 # ignored files
-/.idea/workspace.xml
-/node_modules/
+.idea/workspace.xml
+node_modules
 .DS_Store
-/.nyc_output/
-/coverage/
-/lib/
-/Notes.txt
-/.idea/CustomInspectionsConfig.xml
-/.idea/compiler.xml
+.nyc_output
+coverage
+lib
+Notes.txt
+.idea/CustomInspectionsConfig.xml
+.idea/compiler.xml
 *.log
+.idea/aws.xml
+.idea/highlightedFiles.xml
+.idea/markdown-navigator.xml
+.idea/markdown-navigator-enh.xml
