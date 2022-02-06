@@ -1,91 +1,90 @@
 {
-	"name": "@3fv/ditsy",
-	"version": "1.0.13",
-	"description": "Extended from `async-injection` authored by Frank Stock",
-	"author": "Jonathan Glanz",
-	"license": "MIT",
-	"keywords": [
-		"ioc",
-		"di",
-		"async",
-		"dependency",
-		"injection",
-		"dependency injection",
-		"inversion of control",
-		"injector",
-		"container",
-		"typescript"
-	],
-	"main": "./lib/index.js",
-	"types": "./lib/index.d.ts",
-	"typings": "./lib/index.d.ts",
-	"directories": {
-		"lib": "lib",
-		"src": "src"
-	},
-	"files": [
-		"/README.md",
-		"/License.txt",
-		"/package.json",
-		"/lib"
-	],
-	"scripts": {
-		"clean": "rimraf ./lib",
-		"fullclean": "yarn run clean && rimraf coverage && rimraf ./nyc_output && rimraf ./package-lock.json && rimraf ./node_modules",
-		"//test": "node --require ts-node/register --require tsconfig-paths/register node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
-		"test": "jest",
+  "name": "@3fv/ditsy",
+  "version": "1.0.13",
+  "description": "Extended from `async-injection` authored by Frank Stock",
+  "author": "Jonathan Glanz",
+  "license": "MIT",
+  "keywords": [
+    "ioc",
+    "di",
+    "async",
+    "dependency",
+    "injection",
+    "dependency injection",
+    "inversion of control",
+    "injector",
+    "container",
+    "typescript"
+  ],
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "typings": "./lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "src": "src"
+  },
+  "files": [
+    "/README.md",
+    "/License.txt",
+    "/package.json",
+    "/lib"
+  ],
+  "scripts": {
+    "clean": "rimraf ./lib",
+    "fullclean": "yarn run clean && rimraf ./package-lock.json && rimraf ./node_modules",
+    "dev": "concurrently 'npm:build:watch' 'npm:test:watch'",
+    "test": "jest",
     "test:debug": "node --inspect node_modules/.bin/jest --runInBand",
-		"test:watch": "yarn test --watchAll",
+    "test:watch": "yarn test --watchAll",
     "test:watch:debug": "node --inspect node_modules/.bin/jest  --runInBand --watchAll",
-		"coverage": "rimraf coverage && rimraf ./nyc_output && nyc -e .ts -x \"**/*.spec.ts\" -x \"tst/*\" --reporter=text-summary --reporter=lcov npm run test",
-		"build": "yarn run clean && tsc -b tsconfig.json",
-		"build:watch": "yarn run build --watch",
-		"lint": "tslint -c tslint.json 'src/**/*.ts'"
-	},
-	"publishConfig": {
-		"access": "public"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/3fv/ditsy.git"
-	},
-	"bugs": {
-		"url": "https://github.com/3fv/ditsy/issues"
-	},
-	"dependencies": {
-		"@3fv/deferred": "^1.2.4",
-		"@3fv/guard": "^1.4.18",
-		"@3fv/prelude-ts": "^0.8.22",
-		"assert": "^2.0.0",
-		"lodash": "^4.17.20",
-		"reflect-metadata": "^0.1.13",
-		"ts-pattern": "^1.1.0"
-	},
-	"devDependencies": {
-		"@istanbuljs/nyc-config-typescript": "^1.0.1",
-		"@types/lodash": "^4.14.161",
-		"@types/node": "^14.11.2",
-		"jest": "^26.6.3",
-		"node-notifier": "^9.0.0",
-		"npm-run-all": "^4.1.5",
-		"nyc": "^15.1.0",
-		"prettier": "^2.1.2",
-		"react-refresh": "^0.9.0",
-		"regenerator-runtime": "^0.13.7",
-		"rimraf": "^3.0.2",
-		"source-map-support": "^0.5.19",
-		"ts-jest": "^26.4.4",
-		"ts-lint": "^4.5.1",
-		"ts-node": "^9.1.1",
-		"tsconfig-paths": "^3.9.0",
-		"typescript": "^4.1.3"
-	},
-	"resolutions": {
-		"react-refresh": "0.9.0"
-	},
-	"nyc": {
-		"extends": "@istanbuljs/nyc-config-typescript",
-		"all": true,
-		"check-coverage": true
-	}
+    "build": "yarn run clean && tsc -b tsconfig.json",
+    "build:watch": "yarn run build --watch"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/3fv/ditsy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/3fv/ditsy/issues"
+  },
+  "dependencies": {
+    "@3fv/deferred": "^1.2.4",
+    "@3fv/guard": "^1.4.18",
+    "@3fv/prelude-ts": "^0.8.22",
+    "assert": "^2.0.0",
+    "lodash": "^4.17.20",
+    "reflect-metadata": "^0.1.13",
+    "ts-pattern": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.161",
+    "@types/node": "^16.11.22",
+    "@types/jest": "^27.4.0",
+    "jest": "^27.5.0",
+    "node-notifier": "^10.0.1",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.5.1",
+    "react-refresh": "^0.11.0",
+    "regenerator-runtime": "^0.13.9",
+    "rimraf": "^3.0.2",
+    "source-map-support": "^0.5.21",
+    "ts-jest": "^27.1.3",
+    "ts-lint": "^4.5.1",
+    "ts-node": "^10.4.0",
+    "tsconfig-paths": "^3.12.0",
+    "typescript": "^4.5.5",
+    "prettier-package-json": "^2.6.0",
+    "concurrently": "^7.0.0"
+  },
+  "resolutions": {
+    "react-refresh": "0.11.0"
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "check-coverage": true
+  }
 }

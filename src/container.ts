@@ -14,11 +14,10 @@ import {
   ClassBasedProvider
 } from "./providers"
 import { Deferred } from "@3fv/deferred"
-import { isFunction, isObject, isPromise, isString } from "@3fv/guard"
+import { isFunction, isObject, isString } from "@3fv/guard"
 import { Option } from "@3fv/prelude-ts"
 import { debug, idHint, isNotEmpty, isNotDefined, warn, targetHint } from "./util"
 import { ErrorReason } from "./error"
-import { match, __ } from "ts-pattern"
 import { uniq } from "lodash"
 
 /**
