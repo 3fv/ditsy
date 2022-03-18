@@ -10,9 +10,9 @@ import {
   POSTCONSTRUCT_ASYNC_METADATA_KEY,
   POSTCONSTRUCT_SYNC_METADATA_KEY,
   REFLECT_RETURN,
-  SCOPE_METADATA_KEY, REFLECT_PARAMS, FACTORY_METADATA_KEY, CONTAINER_ID
+  SCOPE_METADATA_KEY, REFLECT_PARAMS, FACTORY_METADATA_KEY, CONTAINER_ID, INJECT_METADATA_PROP_KEY
 } from "./constants"
-import { isFunction, isClass } from "@3fv/guard"
+import { isFunction, isClass, isNumber } from "@3fv/guard"
 import { ProviderOptions } from "./providers"
 import { Scopes } from "./scope"
 import { targetHint, isNotEmpty } from "./util"
@@ -117,13 +117,20 @@ export function Inject(id: InjectableId<any>) {
    * @param parameterIndex The ordinal index of the parameter in the function’s parameter list
    * @returns Undefined (nothing), as this decorator does not modify the parameter in any way.
    */
-  return function (target: Function, parameterName: string | symbol, parameterIndex: number) {
+  return function (target: Function, paramOrPropertyName: string | symbol, paramIndexOrPropDescriptor?: number | PropertyDescriptor) {
     let hint = targetHint(target)
-    if (id === undefined) {
-      throw new Error("Undefined id passed to @Inject [" + hint + "]")
+    if (isNumber(paramIndexOrPropDescriptor)) {
+      if (id === undefined) {
+        throw new Error("Undefined id passed to @Inject [" + hint + "]")
+      }
+      const parameterIndex = paramIndexOrPropDescriptor,
+
+       paramKey = validateSingleConstructorParam("Inject", target, parameterIndex)
+      Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey)
+    } else {
+      const propertyKey = paramOrPropertyName as string | symbol
+      Reflect.defineMetadata(INJECT_METADATA_PROP_KEY, id, target, propertyKey)
     }
-    let paramKey = validateSingleConstructorParam("Inject", target, parameterIndex)
-    Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey)
   }
 }
 

@@ -6,6 +6,8 @@ import { Container } from "../container"
 import { ErrorReason } from "../error"
 
 describe("Async factories", () => {
+
+
   it("Should support delayed retrieval", async () => {
     class A {
       constructor(public c: number) {}
@@ -36,9 +38,10 @@ describe("Async factories", () => {
     expect(end.getTime() - requested.getTime()).toBeGreaterThanOrEqual(20)
     expect(a.c).toEqual(1)
   })
+
   it("Should support async initialization", async () => {
     class A {
-      constructor(public c: number) {}
+      constructor(readonly c: number) {}
     }
 
     let requested: Date = null

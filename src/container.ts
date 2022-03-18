@@ -1,31 +1,41 @@
-import "reflect-metadata"
-import { AbstractConstructor, ClassConstructor, InjectableId } from "./injector"
-import { Binder } from "./binder"
-import { INJECTABLE_METADATA_KEY, SCOPE_METADATA_KEY, CONTAINER_ID } from "./constants"
-import { State } from "./state"
-import {
-  AsyncFactory,
-  Provider,
-  SyncFactory,
-  ProviderOptions,
-  ConstantProvider,
-  FactoryBasedProvider,
-  AsyncFactoryBasedProvider,
-  ClassBasedProvider
-} from "./providers"
 import { Deferred } from "@3fv/deferred"
 import { isFunction, isObject, isString } from "@3fv/guard"
-import { Option } from "@3fv/prelude-ts"
-import { debug, idHint, isNotEmpty, isNotDefined, warn, targetHint } from "./util"
-import { ErrorReason } from "./error"
+import { asOption } from "@3fv/prelude-ts"
 import { uniq } from "lodash"
+import "reflect-metadata"
+import { Binder } from "./binder"
+import {
+  CONTAINER_ID,
+  INJECTABLE_METADATA_KEY,
+  SCOPE_METADATA_KEY
+} from "./constants"
+import { ErrorReason } from "./error"
+import { AbstractConstructor, ClassConstructor, InjectableId } from "./injector"
+import {
+  AsyncFactory,
+  AsyncFactoryBasedProvider,
+  ClassBasedProvider,
+  ConstantProvider,
+  FactoryBasedProvider,
+  Provider,
+  ProviderOptions,
+  SyncFactory
+} from "./providers"
+import { State } from "./state"
+import { isNotDefined, isNotEmpty, targetHint, warn } from "./util"
 
 /**
  * Binder and Injector (aka Container) to handle (a)synchronous dependency management.
  */
 export class Container implements Binder {
+  /**
+   * initialization `Deferred<Container>`
+   */
   private initDeferred: Deferred<this>
 
+  /**
+   * Map of IDs to Providers
+   */
   protected providers = new Map<InjectableId<any>, Provider>()
 
   /**
@@ -42,17 +52,37 @@ export class Container implements Binder {
     return this.initDeferred?.isFulfilled() === true
   }
 
-  protected addProvider(id: InjectableId<any>, provider: Provider, options?: ProviderOptions) {
-    const allIds = uniq([id,...(options?.aliases ?? []),...(provider.config?.aliases ?? [])]),
+  /**
+   * Add an instance provider for an ID
+   *
+   * @param id
+   * @param provider
+   * @param options
+   */
+  protected addProvider(
+    id: InjectableId<any>,
+    provider: Provider,
+    options?: ProviderOptions
+  ) {
+    const allIds = uniq([
+        id,
+        ...(options?.aliases ?? []),
+        ...(provider.config?.aliases ?? [])
+      ]),
       conflictedIds = allIds.filter(id => this.providers.has(id))
     if (isNotEmpty(conflictedIds)) {
       throw new Error(`InjectableId conflicts: ${conflictedIds.join(", ")}`)
     }
 
-    allIds.forEach(id => this.providers.set(id,provider))
+    allIds.forEach(id => this.providers.set(id, provider))
   }
 
-  whenReady() {
+  /**
+   * Promise, resolving when all providers are resolved
+   *
+   * @returns promise (`this.initDeferred.promise`), which is resolved when all providers have resolved
+   */
+  whenReady(): Promise<this> {
     return this.init()
   }
 
@@ -80,11 +110,13 @@ export class Container implements Binder {
     }
     const state = provider.provideAsState()
     if (state.pending)
-      throw new Error("Synchronous request on unresolved asynchronous dependency tree: " + targetHint(id))
+      throw new Error(
+        "Synchronous request on unresolved asynchronous dependency tree: " +
+          targetHint(id)
+      )
     if (state.rejected) throw state.rejected
     return state.fulfilled
   }
-
 
   /**
    * Once resolution (`init`) has begun,
@@ -96,6 +128,7 @@ export class Container implements Binder {
   get isBindable() {
     return !this.initDeferred
   }
+
   /**
    * Once resolution (`init`) has begun,
    * nothing else can be bound to this container
@@ -123,15 +156,16 @@ export class Container implements Binder {
     }
 
     const results = await Promise.all(
-      [...this.providers.entries()].map(
-        ([id, provider]) =>
-          Promise.resolve(provider.resolve())
-            .then(value => Promise.resolve([id, value, provider]))
-            .catch(e => Promise.resolve([id, new ErrorReason(new Map([[id, e]])), provider]))
+      [...this.providers.entries()].map(([id, provider]) =>
+        Promise.resolve(provider.resolve())
+          .then(value => Promise.resolve([id, value, provider]))
+          .catch(e =>
+            Promise.resolve([id, new ErrorReason(new Map([[id, e]])), provider])
+          )
       )
     )
 
-    Option.of(
+    asOption(
       results
         .filter(([, value]) => value instanceof ErrorReason)
         .reduce((errors, [key, err]: [InjectableId<any>, ErrorReason]) => {
@@ -203,7 +237,10 @@ export class Container implements Binder {
   /**
    * @inheritDoc
    */
-  bindClass<T>(constructor: ClassConstructor<T>, options?: ProviderOptions): this
+  bindClass<T>(
+    constructor: ClassConstructor<T>,
+    options?: ProviderOptions
+  ): this
   bindClass<T>(
     id: string | symbol | AbstractConstructor<T>,
     constructor: ClassConstructor<T>,
@@ -215,13 +252,15 @@ export class Container implements Binder {
     options: ProviderOptions = undefined
   ) {
     this.assertBindable()
-    const [defaultId, constructor] = (isFunction(constructorOrAbstractOrId)
-      ? !isFunction(constructorOrOptions)
-        ? [constructorOrAbstractOrId, constructorOrAbstractOrId]
-        : [constructorOrAbstractOrId, constructorOrOptions]
-      : isFunction(constructorOrOptions)
-      ? [constructorOrAbstractOrId, constructorOrOptions]
-      : [undefined, undefined]) as [InjectableId<T>, ClassConstructor<T>]
+    const [defaultId, constructor] = (
+      isFunction(constructorOrAbstractOrId)
+        ? !isFunction(constructorOrOptions)
+          ? [constructorOrAbstractOrId, constructorOrAbstractOrId]
+          : [constructorOrAbstractOrId, constructorOrOptions]
+        : isFunction(constructorOrOptions)
+        ? [constructorOrAbstractOrId, constructorOrOptions]
+        : [undefined, undefined]
+    ) as [InjectableId<T>, ClassConstructor<T>]
 
     const id = options?.id ?? defaultId
 
@@ -230,16 +269,20 @@ export class Container implements Binder {
     }
 
     if (!options) {
-      options = (isObject(constructorOrOptions) && constructorOrOptions !== constructor
-        ? constructorOrOptions
-        : {}) as ProviderOptions
+      options = (
+        isObject(constructorOrOptions) && constructorOrOptions !== constructor
+          ? constructorOrOptions
+          : {}
+      ) as ProviderOptions
     }
 
     if (!Reflect.getMetadata(INJECTABLE_METADATA_KEY, constructor)) {
-      throw new Error("Class not decorated with @Injectable [" + constructor.toString() + "]")
+      throw new Error(
+        "Class not decorated with @Injectable [" + constructor.toString() + "]"
+      )
     }
 
-    Option.ofNullable(Reflect.getMetadata(SCOPE_METADATA_KEY, constructor))
+    asOption(Reflect.getMetadata(SCOPE_METADATA_KEY, constructor))
       .filter(isString)
       .filter(isNotEmpty)
       .ifSome(scope => Object.assign(options, { scope }))
@@ -260,7 +303,11 @@ export class Container implements Binder {
   /**
    * @inheritDoc
    */
-  bindFactory<T>(id: InjectableId<T>, factory: SyncFactory<T>, options: ProviderOptions = {}): this {
+  bindFactory<T>(
+    id: InjectableId<T>,
+    factory: SyncFactory<T>,
+    options: ProviderOptions = {}
+  ): this {
     this.assertBindable()
     const provider = new FactoryBasedProvider(this, id, factory, options)
     this.addProvider(id, provider, options)
@@ -270,12 +317,22 @@ export class Container implements Binder {
   /**
    * @inheritDoc
    */
-  bindAsyncFactory<T>(id: InjectableId<T>, factory: AsyncFactory<T>, options: ProviderOptions = {}): this {
+  bindAsyncFactory<T>(
+    id: InjectableId<T>,
+    factory: AsyncFactory<T>,
+    options: ProviderOptions = {}
+  ): this {
     this.assertBindable()
     const provider = new AsyncFactoryBasedProvider(this, id, factory, options)
     this.addProvider(id, provider, options)
     return this
   }
+
+  // inject<T>(o: T): T {}
+
+  // instance<T>(ctor: AnyConstructor<T>, mutate?: (o:T) => T): T {
+
+  // }
 
   /**
    * As implied by the name prefix, this is a factored out method invoked only by the 'resolve' method.

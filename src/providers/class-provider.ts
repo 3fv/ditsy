@@ -1,5 +1,9 @@
 import { InjectableId, Injector, ClassConstructor } from "../injector"
-import { _getInjectedIdAt, _getOptionalDefaultAt, FactoryMetadata } from "../decorators"
+import {
+  _getInjectedIdAt,
+  _getOptionalDefaultAt,
+  FactoryMetadata
+} from "../decorators"
 import {
   POSTCONSTRUCT_ASYNC_METADATA_KEY,
   POSTCONSTRUCT_SYNC_METADATA_KEY,
@@ -9,7 +13,7 @@ import {
 import { State } from "../state"
 import { BindableProvider } from "./bindable-provider"
 import { ProviderOptions } from "./provider"
-import { Option, Either } from "@3fv/prelude-ts"
+import { Option, Either, asOption } from "@3fv/prelude-ts"
 import { isNotEmpty, warn, targetHint } from "../util"
 import { match } from "ts-pattern"
 import { isDefined, isFunction, isPromise } from "@3fv/guard"
@@ -59,17 +63,23 @@ export class ClassBasedProvider<
     // Check to see if there is a @PostConstruct annotation on a method of the class.
     if (typeof obj === "object" && !Array.isArray(obj) && obj.constructor) {
       let maybeAsync = false
-      let postConstruct = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, obj.constructor)
+      let postConstruct = Reflect.getMetadata(
+        POSTCONSTRUCT_SYNC_METADATA_KEY,
+        obj.constructor
+      )
       if (!postConstruct) {
         maybeAsync = true
-        postConstruct = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, obj.constructor)
+        postConstruct = Reflect.getMetadata(
+          POSTCONSTRUCT_ASYNC_METADATA_KEY,
+          obj.constructor
+        )
       }
       if (
         postConstruct &&
         obj.constructor.prototype[postConstruct] &&
         typeof obj.constructor.prototype[postConstruct] === "function"
       ) {
-        let result
+        let result: any
         try {
           result = obj[postConstruct]()
         } catch (err) {
@@ -83,10 +93,15 @@ export class ClassBasedProvider<
           }
         }
         // The post construction method says it will let us know when it's finished.
-        if (result instanceof Promise || (maybeAsync && typeof result.then === "function")) {
+        if (
+          result instanceof Promise ||
+          (maybeAsync && typeof result.then === "function")
+        ) {
           // Return a State that is pending (the other return statements in this method return a State which is
           // resolved or rejected).
-          return State.create<T>(this.makePromiseForObj<void>(result, () => obj))
+          return State.create<T>(
+            this.makePromiseForObj<void>(result, () => obj)
+          )
         }
       }
     }
@@ -99,7 +114,10 @@ export class ClassBasedProvider<
   }
 
   getFactoryMetadata() {
-    return Reflect.getMetadata(FACTORY_METADATA_KEY, this.maker) as FactoryMetadata
+    return Reflect.getMetadata(
+      FACTORY_METADATA_KEY,
+      this.maker
+    ) as FactoryMetadata
   }
 
   /**
@@ -109,14 +127,19 @@ export class ClassBasedProvider<
     return Option.ofNullable(this.getFactoryMetadata())
       .filter(({ params }) => Array.isArray(params))
       .map(({ params }) => params)
-      .orElse(() => Option.ofNullable(Reflect.getMetadata(REFLECT_PARAMS, this.maker) as Array<any>))
+      .orElse(() =>
+        Option.ofNullable(
+          Reflect.getMetadata(REFLECT_PARAMS, this.maker) as Array<any>
+        )
+      )
       .filter(Array.isArray)
       .map(params =>
         params.map((argType, index) =>
           Option.ofNullable(argType)
             .map(argType => {
               const overrideToken = _getInjectedIdAt(this.maker, index)
-              const actualToken = overrideToken === undefined ? argType : overrideToken
+              const actualToken =
+                overrideToken === undefined ? argType : overrideToken
               // Ask our configured container to resolve the parameter.
               let param = this.stateResolver(actualToken)
               // If the parameter could not be resolved, see if there is an @Optional annotation
@@ -159,22 +182,30 @@ export class ClassBasedProvider<
     // If any of the params are in a pending state, we will have to wait for them to be resolved before we can
     // construct.
     try {
-      return Option.of(params.filter(({ pending, fulfilled }) => isPromise(fulfilled) || !!pending).map(({ promise,fulfilled }) => isPromise(fulfilled) ? fulfilled : promise))
+      return Option.of(
+        params
+          .filter(({ pending, fulfilled }) => isPromise(fulfilled) || !!pending)
+          .map(({ promise, fulfilled }) =>
+            isPromise(fulfilled) ? fulfilled : promise
+          )
+      )
         .filter(isNotEmpty)
         .match({
           Some: pendingParams => {
             // Some of the parameters needed for construction are not yet available, wait for them and then attempt
             // construction.
-            const objPromise = this.makePromiseForObj<any[]>(Promise.all(pendingParams), () =>
-              // All the parameters are now available, instantiate the class.
-              // If this throws, it will be handled by our caller.
-              this.createInstance(params)
+            const objPromise = this.makePromiseForObj<any[]>(
+              Promise.all(pendingParams),
+              () =>
+                // All the parameters are now available, instantiate the class.
+                // If this throws, it will be handled by our caller.
+                this.createInstance(params)
             )
 
             // Once the obj is resolved, then we need to check for PostConstruct and if it was async, wait for that too.
             return State.create<T>(
-              objPromise.then(
-                obj =>
+              objPromise
+                .then(obj =>
                   match<State<T>>(this.makePostConstructState(obj))
                     .with({ pending: true }, ({ promise }) => promise)
                     .when(
@@ -188,15 +219,7 @@ export class ClassBasedProvider<
                     .otherwise(() => {
                       throw new Error(`Unknown state`)
                     })
-
-                // if (state.pending) {
-                //   return state.promise // chain (aka wait some more).
-                // } else if (state.rejected) {
-                //   return state.rejected // error
-                // } else {
-                //   return state.fulfilled // value (aka obj).
-                // }
-              )
+                )
                 .catch(err => {
                   warn("Failed to construct " + targetHint(this.maker))
                   throw err
@@ -213,12 +236,12 @@ export class ClassBasedProvider<
               .recoverWith(err => {
                 warn("Failed to construct", err)
 
-                return Either.try(() => State.create<T>(null, undefined, this.queryErrorHandler(err))).recoverWith(
-                  err2 => {
-                    warn("Failed to construct", err2)
-                    return Either.right(State.create<T>(null, err2, undefined))
-                  }
-                )
+                return Either.try(() =>
+                  State.create<T>(null, undefined, this.queryErrorHandler(err))
+                ).recoverWith(err2 => {
+                  warn("Failed to construct", err2)
+                  return Either.right(State.create<T>(null, err2, undefined))
+                })
               })
               .getOrThrow(`Unable to create state`)
         })
@@ -230,24 +253,38 @@ export class ClassBasedProvider<
 
   private createInstance(params: State[]): Promise<T> | T | undefined {
     const args = params.map(p => p.fulfilled)
-    return this.hasFactory
-      ? Option.of(this.getFactoryMetadata())
+    const pendingObj = this.hasFactory
+      ? asOption(this.getFactoryMetadata())
           .map(({ methodName }) =>
-            Option.of(this.maker[methodName]).filter(isFunction).getOrThrow(`Factory method not found: ${methodName}`)
+            asOption(this.maker[methodName])
+              .filter(isFunction)
+              .getOrThrow(`Factory method not found: ${methodName}`)
           )
           .map(factoryFn => {
             const checkValue = <T>(value: T): T => {
-                if (!(value instanceof this.maker) && !(value instanceof (this.id as any))) {
-                  throw new Error(`Factory result value is not an instanceof class: ${targetHint(this.maker)}`)
+                if (
+                  !(value instanceof this.maker) &&
+                  !(value instanceof (this.id as any))
+                ) {
+                  throw new Error(
+                    `Factory result value is not an instanceof class: ${targetHint(
+                      this.maker
+                    )}`
+                  )
                 }
 
                 return value
               },
               result = factoryFn.apply(this.maker, args)
-            return isPromise(result) ? result.then(checkValue) : checkValue(result)
+            return isPromise(result)
+              ? result.then(checkValue)
+              : checkValue(result)
           })
 
           .getOrThrow(`Unable to find factory metadata`)
       : Reflect.construct(this.maker, args)
+
+      // TODO: Use injector here
+      return pendingObj //isPromise(pendingObj) ? pendingObj(this)
   }
 }
