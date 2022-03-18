@@ -23,15 +23,12 @@ import { Scopes } from "./scope"
 import { targetHint, isNotEmpty } from "./util"
 import { Option } from "@3fv/prelude-ts"
 
+export interface PropertyInjectors {
+  [key: string | symbol]: InjectableId<any>
+}
+
 // Validate that 'target' is a class constructor function.
 function isClassConstructor<T>(target: any): target is T {
-  // if () {
-  // 	if (target.hasOwnProperty('prototype')) {
-  // 		if (target.prototype.constructor === target) {
-  // 			return true;
-  // 		}
-  // 	}
-  // }
   return isClass(target)
 }
 
@@ -132,19 +129,23 @@ export function Inject(id: InjectableId<any>) {
    * @returns Undefined (nothing), as this decorator does not modify the
    *   parameter in any way.
    */
-  return function (target: Function, paramOrPropertyName: string | symbol, paramIndexOrPropDescriptor?: number | PropertyDescriptor) {
+  return function (target: any, paramOrPropertyName: string | symbol, paramIndexOrPropDescriptor?: number | PropertyDescriptor) {
     let hint = targetHint(target)
     if (isNumber(paramIndexOrPropDescriptor)) {
       if (id === undefined) {
         throw new Error("Undefined id passed to @Inject [" + hint + "]")
       }
       const parameterIndex = paramIndexOrPropDescriptor,
-
-       paramKey = validateSingleConstructorParam("Inject", target, parameterIndex)
+        paramKey = validateSingleConstructorParam("Inject", target, parameterIndex)
       Reflect.defineMetadata(INJECT_METADATA_KEY, id, target, paramKey)
     } else {
       const propertyKey = paramOrPropertyName as string | symbol
-      Reflect.defineMetadata(INJECT_METADATA_PROP_KEY, id, target, propertyKey)
+      const props = (Reflect.getMetadata(INJECT_METADATA_PROP_KEY, target) ?? {}) as PropertyInjectors
+      if (props[propertyKey]) {
+        throw new Error("Can not inject a property twice")
+      }
+      props[propertyKey] = id
+      Reflect.defineMetadata(INJECT_METADATA_PROP_KEY, props, target)
     }
   }
 }
@@ -211,8 +212,10 @@ export function _getOptionalDefaultAt(target: any, parameterIndex: number): { va
  */
 export function PostConstruct() {
   /**
-   * @param prototypeOrConstructor   The prototype of the class (we don't allow
+   * The prototype of the target class (we don't allow
    *   @PostConstruct on anything other than a class instance method.
+   *
+   * @param prototypeOrConstructor   class prototype
    * @param methodName   The name of the method.
    * @param descriptor   The Property Descriptor for the method.
    * @returns Undefined (nothing), as this decorator does not modify the method

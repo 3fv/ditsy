@@ -148,14 +148,18 @@ class A {
 
     // Called before the object is placed into the container (or is returned from get/resolve)
     @PostConstruct()
-    public init(): void { ... }
+    public init(): void {
+      // ... initialization code here 
+    }
 }
 class D {
     public constructor() { }
 
     // Will not be placed into the container (or returned) until the Promise has been resolved.
     @PostConstruct()
-    public init(): Promise<void> { ... }
+    public init(): Promise<void> { 
+      // ... initialization code here 
+    }
 }
 ```
 

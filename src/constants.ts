@@ -20,3 +20,4 @@ export const OPTIONAL_METADATA_KEY = "OPTIONAL_KEY";
 
 export const REFLECT_PARAMS = 'design:paramtypes';
 export const REFLECT_RETURN = 'design:returntype';
+export const REFLECT_TYPE = 'design:type';

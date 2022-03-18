@@ -12,7 +12,7 @@ import {
   Scope,
   Factory,
   FactoryMetadata,
-  InjectContainer
+  InjectContainer, PropertyInjectors
 } from "../decorators"
 import { InjectableId } from "../injector"
 import { Container } from "../container"
@@ -22,7 +22,9 @@ import {
   REFLECT_PARAMS,
   INJECTABLE_METADATA_KEY,
   SCOPE_METADATA_KEY,
-  FACTORY_METADATA_KEY
+  FACTORY_METADATA_KEY,
+  REFLECT_RETURN,
+  REFLECT_TYPE, INJECT_METADATA_PROP_KEY
 } from "../constants"
 import { ProviderOptions } from "../providers"
 
@@ -172,12 +174,15 @@ describe("@PostConstruct", () => {
   it("Should detect an asynchronous return", () => {
     class A {
       @PostConstruct()
-      public initMethod(): Promise<void> {
+      public async initMethod(): Promise<void> {
         return Promise.resolve()
       }
     }
 
     const amd = Reflect.getMetadata(POSTCONSTRUCT_ASYNC_METADATA_KEY, A)
+    const rt = Reflect.getMetadata(REFLECT_RETURN, A, "initMethod")
+    const t = Reflect.getMetadata(REFLECT_TYPE, A, "initMethod")
+    
     expect(amd).toBe("initMethod")
     const smd = Reflect.getMetadata(POSTCONSTRUCT_SYNC_METADATA_KEY, A)
     expect(smd).toBeUndefined()
@@ -294,6 +299,25 @@ describe("@Inject", () => {
 
     expect(setup).toThrowError(/^Undefined id passed to @Inject \[.+/)
   })
+  
+  it("Should inject member", () => {
+    
+    class D {
+      
+      @Inject(A)
+      readonly a: A
+  
+      @Inject(B)
+      readonly b: B
+      
+      public constructor() {}
+    }
+  
+    const propInjectors = Reflect.getMetadata(INJECT_METADATA_PROP_KEY, D.prototype) as PropertyInjectors,
+      propInjectorKeys = Object.keys(propInjectors)
+    
+    expect(propInjectorKeys.length).toBe(2)
+  })
 })
 
 describe("@Optional", () => {
@@ -371,4 +395,5 @@ describe("@Optional", () => {
     expect(t.b.b).toEqual("DefaultB")
     expect(() => container.bindClass<B>("B", B)).toThrow()
   })
+  
 })
