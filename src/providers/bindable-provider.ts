@@ -1,9 +1,12 @@
 import { InjectableId, Injector, ClassConstructor } from "../injector"
-import { BindAs, BindErrHandler } from "../binder"
-import { AsyncFactory, Provider, SyncFactory, ProviderOptions } from "./provider"
+import {
+  AsyncFactory,
+  Provider,
+  SyncFactory,
+  ProviderOptions
+} from "./provider"
 import { OnErrorCallback, ErrorReason } from "../error"
 import { isPromise } from "@3fv/guard"
-import { Option } from "@3fv/prelude-ts"
 
 function isErrorObj(err: any): boolean {
   if (err instanceof Error || err instanceof ErrorReason) return true
@@ -12,8 +15,8 @@ function isErrorObj(err: any): boolean {
 
 /**
  * @inheritDoc
- * This abstraction is for Providers that can be additionally configured as Singletons and/or configured with an error
- *   handling callback.
+ * This abstraction is for Providers that can be additionally configured as
+ *   Singletons and/or configured with an error handling callback.
  */
 export abstract class BindableProvider<
   T,
@@ -30,10 +33,12 @@ export abstract class BindableProvider<
   }
 
   /**
-   * Encapsulate the logic of invoking any configured error handler, and processing it's result.
+   * Encapsulate the logic of invoking any configured error handler, and
+   * processing it's result.
    * @see OnErrorCallback
    *
-   * @returns The object substituted by the callback (otherwise this method throws the appropriate error).
+   * @returns The object substituted by the callback (otherwise this method
+   *   throws the appropriate error).
    */
   protected queryErrorHandler(err: Error, obj?: any): T {
     // There was an error during construction, see if an error handler was provided, and if so, see what it wants to do.
@@ -51,10 +56,11 @@ export abstract class BindableProvider<
   }
 
   /**
-   * This is like a retry mechanism that uses the Provider's errorHandler (if any) to attempt recovery whenever the
-   * supplied Promise rejects. This method returns a Promise that rejects if recovery was not possible. If the supplied
-   * Promise resolves, then this method passes the result to the callback, and then resolve as whatever that callback
-   * returns.
+   * This is like a retry mechanism that uses the Provider's errorHandler (if
+   * any) to attempt recovery whenever the supplied Promise rejects. This
+   * method returns a Promise that rejects if recovery was not possible. If the
+   * supplied Promise resolves, then this method passes the result to the
+   * callback, and then resolve as whatever that callback returns.
    *
    * @param waitFor   The supplied Promise.
    * @param cb    Callback to be invoked if the supplied Promise resolves.
