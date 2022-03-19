@@ -69,7 +69,7 @@ export abstract class BindableProvider<
     try {
       const pending = await waitFor,
         result = cb(pending)
-      return await (isPromise(result) ? result : Promise.resolve(result))
+      return await Promise.resolve(result)
     } catch (err: any) {
       // There was an error during async post construction, see if an error handler was provided, and if so, see what it wants to do.
       if (this.errorHandler) {

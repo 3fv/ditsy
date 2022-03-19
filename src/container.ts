@@ -25,7 +25,8 @@ import { State } from "./state"
 import { isNotDefined, isNotEmpty, targetHint, warn } from "./util"
 
 /**
- * Binder and Injector (aka Container) to handle (a)synchronous dependency management.
+ * Binder and Injector (aka Container) to handle (a)synchronous dependency
+ * management.
  */
 export class Container implements Binder {
   
@@ -40,8 +41,8 @@ export class Container implements Binder {
   protected providers = new Map<InjectableId<any>, Provider>()
 
   /**
-   * Create a new Container, with an optional parent Injector which will be searched if any given InjectableId is not
-   * bound within this Container.
+   * Create a new Container, with an optional parent Injector which will be
+   * searched if any given InjectableId is not bound within this Container.
    *
    * @param parent
    */
@@ -84,7 +85,8 @@ export class Container implements Binder {
   /**
    * Promise, resolving when all providers are resolved
    *
-   * @returns promise (`this.initDeferred.promise`), which is resolved when all providers have resolved
+   * @returns promise (`this.initDeferred.promise`), which is resolved when all
+   *   providers have resolved
    */
   whenReady(): Promise<this> {
     return this.init()
@@ -222,11 +224,12 @@ export class Container implements Binder {
 
   // noinspection JSUnusedGlobalSymbols
   /**
-   * This method is not part of the Binding interface, because it is highly unusual.
-   * But that doesn't mean we can't imagine scenarios where you might require it.
+   * This method is not part of the Binding interface, because it is highly
+   * unusual. But that doesn't mean we can't imagine scenarios where you might
+   * require it.
    * @param id    The id to be removed.
-   * @param ascending  If true, this will remove all bindings of the specified id all the way up the parent container
-   *   chain (if it exists).
+   * @param ascending  If true, this will remove all bindings of the specified
+   *   id all the way up the parent container chain (if it exists).
    */
   removeBinding<T>(id: InjectableId<T>, ascending?: boolean): void {
     this.assertBindable()
@@ -258,7 +261,7 @@ export class Container implements Binder {
     options?: ProviderOptions
   ): this
   bindClass<T>(
-    constructorOrAbstractOrId: ClassConstructor<T>,
+    constructorOrAbstractOrId: InjectableId<T> | ClassConstructor<T>,
     constructorOrOptions: ClassConstructor<T> | ProviderOptions = undefined,
     options: ProviderOptions = undefined
   ) {
@@ -346,8 +349,9 @@ export class Container implements Binder {
   // }
 
   /**
-   * As implied by the name prefix, this is a factored out method invoked only by the 'resolve' method.
-   * It makes searching our parent (if it exists) easier (and quicker) IF our parent is a fellow instance of Container.
+   * As implied by the name prefix, this is a factored out method invoked only
+   * by the 'resolve' method. It makes searching our parent (if it exists)
+   * easier (and quicker) IF our parent is a fellow instance of Container.
    */
   protected resolveState<T>(id: InjectableId<T>): State<T> {
     const provider = this.providers.get(id)
