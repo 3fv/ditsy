@@ -28,6 +28,7 @@ import { isNotDefined, isNotEmpty, targetHint, warn } from "./util"
  * Binder and Injector (aka Container) to handle (a)synchronous dependency management.
  */
 export class Container implements Binder {
+  
   /**
    * initialization `Deferred<Container>`
    */
@@ -47,7 +48,10 @@ export class Container implements Binder {
   constructor(protected parent?: Container) {
     this.bindConstant(CONTAINER_ID, this)
   }
-
+  
+  /**
+   * Sync `isReady` check
+   */
   get isReady() {
     return this.initDeferred?.isFulfilled() === true
   }
@@ -109,13 +113,20 @@ export class Container implements Binder {
       throw new Error("Symbol not bound: " + targetHint(id))
     }
     const state = provider.provideAsState()
-    if (state.pending)
-      throw new Error(
-        "Synchronous request on unresolved asynchronous dependency tree: " +
+    
+    switch(state.status) {
+      case "pending":
+        throw new Error(
+          "Synchronous request on unresolved asynchronous dependency tree: " +
           targetHint(id)
-      )
-    if (state.rejected) throw state.rejected
-    return state.fulfilled
+        )
+      case "rejected":
+        throw state.rejected
+      default:
+        return state.fulfilled
+    }
+    
+    
   }
 
   /**

@@ -10,6 +10,9 @@ export interface StateData<T, E> {
   rejection?: Error | any
 }
 
+export type StateStatus = "pending" | "rejected" | "fulfilled"
+
+
 export class State<T = any, E = any> {
   /**
    * Create a state record
@@ -78,5 +81,9 @@ export class State<T = any, E = any> {
 
   get rejected(): E | any{
     return this.data.rejection
+  }
+  
+  get status(): StateStatus {
+    return this.pending ? "pending" : this.rejected ? "rejected" : "fulfilled"
   }
 }

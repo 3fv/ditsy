@@ -16,7 +16,9 @@ import { ProviderOptions } from "./provider"
 import { Option, Either, asOption } from "@3fv/prelude-ts"
 import { isNotEmpty, warn, targetHint } from "../util"
 import { match } from "ts-pattern"
+import { get } from "lodash/fp"
 import { isDefined, isFunction, isPromise } from "@3fv/guard"
+
 
 export type ResolveStateCallback = (id: InjectableId<any>) => State
 
@@ -108,7 +110,10 @@ export class ClassBasedProvider<
     // No PostConstruct, just return a resolved State
     return State.create<T>(null, undefined, obj)
   }
-
+  
+  /**
+   * Whether a factory is configured or not
+   */
   get hasFactory() {
     return Reflect.hasMetadata(FACTORY_METADATA_KEY, this.maker)
   }
@@ -124,18 +129,18 @@ export class ClassBasedProvider<
    * This method collects the States of all the constructor parameters for our target class.
    */
   protected getRequiredParameterStates<T>(): State[] {
-    return Option.ofNullable(this.getFactoryMetadata())
-      .filter(({ params }) => Array.isArray(params))
-      .map(({ params }) => params)
+    return asOption(this.getFactoryMetadata())
+      .map(get("params"))
+      .filter(Array.isArray)
       .orElse(() =>
-        Option.ofNullable(
+        asOption(
           Reflect.getMetadata(REFLECT_PARAMS, this.maker) as Array<any>
         )
+          .filter(Array.isArray)
       )
-      .filter(Array.isArray)
-      .map(params =>
-        params.map((argType, index) =>
-          Option.ofNullable(argType)
+      
+      .map(params => params.map((argType, index) =>
+          asOption(argType)
             .map(argType => {
               const overrideToken = _getInjectedIdAt(this.maker, index)
               const actualToken =
@@ -159,11 +164,7 @@ export class ClassBasedProvider<
         )
       )
       .getOrElse([])
-
-    // const argTypes = Reflect.getMetadata(REFLECT_PARAMS, this.maker)
-    // if (argTypes === undefined) {
-    //   return []
-    // }
+    
   }
 
   /**

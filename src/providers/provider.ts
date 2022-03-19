@@ -68,13 +68,13 @@ export abstract class Provider<T = any, M = any> {
   /**
    * This is the workhorse method of the Provider, and is invoked directly or indirectly by both Injector.get and
    * Injector.resolve. This method returns the current State<T> if it is already known (which it might be for Singleton
-   * scenarios). Otherwise it resolves the State<T>. IF the Provider<T> is a Singleton, it's State<T> is updated before
+   * scenarios). Otherwise, it resolves the State<T>. IF the Provider<T> is a Singleton, it's State<T> is updated before
    * returning.
    */
   abstract provideAsState(): State<T>
 
   /**
-   * Whether or not this providers
+   * Whether this providers
    * result is only computed once
    *
    * @returns {boolean}

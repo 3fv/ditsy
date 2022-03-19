@@ -1,4 +1,3 @@
-import "source-map-support/register"
 import "reflect-metadata"
 import "jest"
 
@@ -397,3 +396,5 @@ describe("@Optional", () => {
   })
   
 })
+
+export {}
