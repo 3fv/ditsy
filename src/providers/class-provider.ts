@@ -7,6 +7,8 @@ import {
 import {
   POSTCONSTRUCT_ASYNC_METADATA_KEY,
   POSTCONSTRUCT_SYNC_METADATA_KEY,
+  DISPOSE_ASYNC_METADATA_KEY,
+  DISPOSE_SYNC_METADATA_KEY,
   REFLECT_PARAMS,
   FACTORY_METADATA_KEY
 } from "../constants"
@@ -110,7 +112,7 @@ export class ClassBasedProvider<
     // No PostConstruct, just return a resolved State
     return State.create<T>(null, undefined, obj)
   }
-  
+
   /**
    * Whether a factory is configured or not
    */
@@ -138,7 +140,7 @@ export class ClassBasedProvider<
         )
           .filter(Array.isArray)
       )
-      
+
       .map(params => params.map((argType, index) =>
           asOption(argType)
             .map(argType => {
@@ -164,7 +166,7 @@ export class ClassBasedProvider<
         )
       )
       .getOrElse([])
-    
+
   }
 
   /**

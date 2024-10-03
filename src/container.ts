@@ -29,7 +29,7 @@ import { isNotDefined, isNotEmpty, targetHint, warn } from "./util"
  * management.
  */
 export class Container implements Binder {
-  
+
   /**
    * initialization `Deferred<Container>`
    */
@@ -49,7 +49,7 @@ export class Container implements Binder {
   constructor(protected parent?: Container) {
     this.bindConstant(CONTAINER_ID, this)
   }
-  
+
   /**
    * Sync `isReady` check
    */
@@ -115,7 +115,7 @@ export class Container implements Binder {
       throw new Error("Symbol not bound: " + targetHint(id))
     }
     const state = provider.provideAsState()
-    
+
     switch(state.status) {
       case "pending":
         throw new Error(
@@ -127,8 +127,10 @@ export class Container implements Binder {
       default:
         return state.fulfilled
     }
-    
-    
+  }
+
+  get allKeys(): InjectableId<any>[] {
+    return [...this.providers.keys()]
   }
 
   /**
@@ -138,7 +140,7 @@ export class Container implements Binder {
    *
    * @returns {boolean}
    */
-  get isBindable() {
+  get isBindable(): boolean {
     return !this.initDeferred
   }
 
@@ -201,7 +203,7 @@ export class Container implements Binder {
    *
    * @returns {Promise<this>}
    */
-  resolveAll() {
+  resolveAll():Promise<this> {
     return this.init()
   }
 
