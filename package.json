@@ -1,6 +1,6 @@
 {
   "name": "@3fv/ditsy",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Extended from `async-injection` originally authored by Frank Stock",
   "author": "Jonathan Glanz",
   "license": "MIT",
