@@ -2,24 +2,24 @@
 # yarn lockfile v1
 
 
-"@3fv/deferred@^1.2.10":
-  version "1.2.10"
-  resolved "https://registry.npmjs.org/@3fv/deferred/-/deferred-1.2.10.tgz#9262699c74844d1e3bd2ae367d8c6945f420410d"
-  integrity sha512-PyZ9d5OmEwIilpSmjRrJNHQlILUeALaT1VJi08+llU+g5IfmOl+EH1ulV2Xf5Qm10+Tpua11HGP2gbOqQJjQsA==
+"@3fv/deferred@^1.2.14":
+  version "1.2.14"
+  resolved "https://registry.yarnpkg.com/@3fv/deferred/-/deferred-1.2.14.tgz#d0add3cdb4a5ce464f0248b7523b0e459dc1ee1b"
+  integrity sha512-mDwDe3sxuONNCAJecWTFY9Gj9O3gat87iCg3Bm2t79U8wucESrAoBgpktaoh4I7avupb5jSjOPEWw2scEeO7Ow==
 
-"@3fv/guard@^1.4.30", "@3fv/guard@^1.4.35":
-  version "1.4.35"
-  resolved "https://registry.npmjs.org/@3fv/guard/-/guard-1.4.35.tgz#bc7dda8b8ff75e70e1f8e8da250b306a2369d74a"
-  integrity sha512-tDo1aKawqW1sT6fyMp4+m7cTYtISZ4r2YOz4Az2/F/EteSZvhB6vUCsEF8feM+NTpAPF4nrsCmlQrrAmKfkiPw==
+"@3fv/guard@^1.4.38", "@3fv/guard@^1.4.39":
+  version "1.4.39"
+  resolved "https://registry.yarnpkg.com/@3fv/guard/-/guard-1.4.39.tgz#07143192c9786c7764725a8f38fd587d9d9d7197"
+  integrity sha512-yWMyr9EWjnSbfyaafZfByjIu+Lbh9OBviSeTIv1tWN9F0qFtCw1nP9pZNQfpdgWcaDuR9gXbZjUnkt6wb5+YVA==
   dependencies:
-    lodash "^4.17.15"
+    lodash "^4.17.21"
 
-"@3fv/prelude-ts@^0.8.29":
-  version "0.8.29"
-  resolved "https://registry.npmjs.org/@3fv/prelude-ts/-/prelude-ts-0.8.29.tgz#1973395696c51dc516e3aac9f723d9ab32ce08cd"
-  integrity sha512-hXHjgsVMmlUVknHT4a1LZj2o3CLf5CeFvhPYl19QkXLSz3mcJwKEk3rgCU0hWpW15u8qi3dEVGjNFHzfLh8kaA==
+"@3fv/prelude-ts@^0.8.37":
+  version "0.8.37"
+  resolved "https://registry.yarnpkg.com/@3fv/prelude-ts/-/prelude-ts-0.8.37.tgz#e33caba7598a1aa4189cd657f20305bc676d205e"
+  integrity sha512-BmHtMi1eAdQ3w//P4wGFRSFqtxgNyWRmV8HPtWzFf9fXS7L+EuUK7iI7AEIS8+/fGjfkLxDPrg6K09PA/wYv9Q==
   dependencies:
-    "@3fv/guard" "^1.4.30"
+    "@3fv/guard" "^1.4.38"
     hamt_plus "^1.0.2"
     list "^2.0.19"
 
@@ -2627,7 +2627,7 @@ lodash.sortby@^4.7.0:
   resolved "https://registry.npmjs.org/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
   integrity sha1-7dFMgk4sycHgsKG0K7UhBRakJDg=
 
-lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.21, lodash@^4.7.0:
+lodash@^4.17.19, lodash@^4.17.21, lodash@^4.7.0:
   version "4.17.21"
   resolved "https://registry.npmjs.org/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
