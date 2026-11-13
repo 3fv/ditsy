@@ -7,7 +7,7 @@ import {
 import { State } from "../state"
 import { BindableProvider } from "./bindable-provider"
 import { asOption, Either } from "@3fv/prelude-ts"
-import { identity } from "lodash"
+import identity from "lodash/identity.js"
 import { Bind } from "../internal"
 
 

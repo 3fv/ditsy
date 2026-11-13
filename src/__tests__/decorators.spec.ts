@@ -52,7 +52,7 @@ describe("@Injectable", () => {
       class A {}
     }
 
-    expect(setup).toThrowError(/^@Injectable applied multiple times \[.+/)
+    expect(setup).toThrow(/^@Injectable applied multiple times \[.+/)
   })
 })
 
@@ -87,7 +87,7 @@ describe("@Singleton", () => {
       class A {}
     }
 
-    expect(setup).toThrowError(/^@Scope can not be specified if `scope` is provided in `options`.+/)
+    expect(setup).toThrow(/^@Scope can not be specified if `scope` is provided in `options`.+/)
   })
 })
 
@@ -154,7 +154,7 @@ describe("@Factory", () => {
   //     class A {}
   //   }
   //
-  //   expect(setup).toThrowError(/^@Scope can not be specified if `scope` is provided in `options`.+/)
+  //   expect(setup).toThrow(/^@Scope can not be specified if `scope` is provided in `options`.+/)
   // })
 })
 
@@ -199,7 +199,7 @@ describe("@PostConstruct", () => {
       }
     }
 
-    expect(setup).toThrowError(/^@PostConstruct applied multiple times \[.+/)
+    expect(setup).toThrow(/^@PostConstruct applied multiple times \[.+/)
   })
 
   it("Should throw when applied to static member", () => {
@@ -211,7 +211,7 @@ describe("@PostConstruct", () => {
       }
     }
 
-    expect(setup).toThrowError(/^@PostConstruct not applied to instance method \[.+/)
+    expect(setup).toThrow(/^@PostConstruct not applied to instance method \[.+/)
   })
 })
 
@@ -296,7 +296,7 @@ describe("@Inject", () => {
       }
     }
 
-    expect(setup).toThrowError(/^Undefined id passed to @Inject \[.+/)
+    expect(setup).toThrow(/^Undefined id passed to @Inject \[.+/)
   })
   
   it("Should inject member", () => {

@@ -1,7 +1,7 @@
 import { State } from "../state"
 
 import { Injector, InjectableId } from "../injector"
-import { defaults } from "lodash"
+import defaults from "lodash/defaults.js"
 import { OnErrorCallback } from "../error"
 import { Scopes, KnownScopes, KnownScope } from "../scope"
 

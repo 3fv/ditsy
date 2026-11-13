@@ -4,7 +4,13 @@ node_modules
 .DS_Store
 .nyc_output
 coverage
+*.tsbuildinfo
 lib
+dist
+# pnpm is the package manager and pnpm-lock.yaml is tracked;
+# lockfiles of other package managers are never committed.
+yarn.lock
+package-lock.json
 Notes.txt
 .idea/CustomInspectionsConfig.xml
 .idea/compiler.xml
@@ -13,3 +19,8 @@ Notes.txt
 .idea/highlightedFiles.xml
 .idea/markdown-navigator.xml
 .idea/markdown-navigator-enh.xml
+
+# Local agent tooling state
+.omc*
+.omx*
+.remember

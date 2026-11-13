@@ -18,7 +18,7 @@ import { ProviderOptions } from "./provider"
 import { Option, Either, asOption } from "@3fv/prelude-ts"
 import { isNotEmpty, warn, targetHint } from "../util"
 import { match } from "ts-pattern"
-import { get } from "lodash/fp"
+import get from "lodash/fp/get.js"
 import { isDefined, isFunction, isPromise } from "@3fv/guard"
 
 

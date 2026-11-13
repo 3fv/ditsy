@@ -1,7 +1,7 @@
 import { Deferred } from "@3fv/deferred"
 import { isFunction, isObject, isString } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
-import { uniq } from "lodash"
+import uniq from "lodash/uniq.js"
 import "reflect-metadata"
 import { Binder } from "./binder"
 import {

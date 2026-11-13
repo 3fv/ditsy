@@ -1,31 +1,7 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "lib": [
-      "dom",
-      "esnext"
-    ],
-    "declaration": true,
-    "outDir": "./lib",
-    "removeComments": false,
-    "strict": false,
-    "moduleResolution": "node",
-    "baseUrl": "./",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "incremental": true,
-    "sourceMap": true,
-    "inlineSources": true,
-    "isolatedModules": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  },
-  "exclude": [
-    "node_modules",
-    "lib"
-  ],
-  "include": [
-    "src"
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.esm.json" },
+    { "path": "./tsconfig.cjs.json" }
   ]
 }

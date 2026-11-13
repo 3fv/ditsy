@@ -140,7 +140,7 @@ describe("Async factories", () => {
       })
 
 
-    expect(impatient).toThrowError(
+    expect(impatient).toThrow(
       /Container has not finished initializing/
     )
   })

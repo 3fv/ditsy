@@ -1,7 +1,8 @@
 import { isDev } from "./dev"
 import { isFunction, isBoolean, isDefined, isString, isSymbol, isClass } from "@3fv/guard"
 import { InjectableId } from "./injector"
-import { isEmpty, negate } from "lodash"
+import isEmpty from "lodash/isEmpty.js"
+import negate from "lodash/negate.js"
 import { Option } from "@3fv/prelude-ts"
 
 export function debug(test: boolean | any, ...args: any[]) {

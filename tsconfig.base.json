@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "declaration": true,
+    "removeComments": false,
+    "strict": false,
+    "moduleResolution": "bundler",
+    "types": ["node", "jest"],
+    "types": ["node", "jest"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "composite": true,
+    "incremental": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "isolatedModules": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "exclude": [
+    "node_modules",
+    "lib"
+  ],
+  "include": [
+    "src"
+  ]
+}
