@@ -1,3 +1,5 @@
+minimumReleaseAge: 0
+
 allowBuilds:
   "@swc/core": false
   "@parcel/watcher": false
